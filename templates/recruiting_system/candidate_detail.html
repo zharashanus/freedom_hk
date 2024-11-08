@@ -1,0 +1,92 @@
+{% extends 'auth_freedom/base.html' %}
+
+{% block title %}Профиль кандидата{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card">
+        <div class="card-body">
+            <h2 class="card-title">{{ candidate.first_name }} {{ candidate.last_name }}</h2>
+            
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <h4>Основная информация</h4>
+                    <p>
+                        <strong>Email:</strong> {{ candidate.email }}<br>
+                        <strong>Телефон:</strong> {{ candidate.phone }}<br>
+                        <strong>Специализация:</strong> {{ candidate.specialization }}<br>
+                        <strong>Опыт работы:</strong> {{ candidate.experience }} лет<br>
+                        <strong>Уровень:</strong> {{ candidate.get_level_display }}<br>
+                        <strong>Локация:</strong> {{ candidate.country }}, {{ candidate.region }}<br>
+                        <strong>Желаемая зарплата:</strong> {{ candidate.desired_salary }}<br>
+                        <strong>Статус поиска:</strong> {{ candidate.get_search_status_display }}<br>
+                        <strong>Готовность к переезду:</strong> {{ candidate.get_relocation_status_display }}
+                    </p>
+
+                    <h4>Образование</h4>
+                    <p>
+                        <strong>Учебное заведение:</strong> {{ candidate.education.institution }}<br>
+                        <strong>Факультет:</strong> {{ candidate.education.faculty }}<br>
+                        <strong>Степень:</strong> {{ candidate.education.degree }}<br>
+                        <strong>Год окончания:</strong> {{ candidate.education.graduation_year }}
+                    </p>
+                </div>
+                
+                <div class="col-md-6">
+                    <h4>Навыки</h4>
+                    <div class="mb-3">
+                        <strong>Технические навыки:</strong>
+                        <ul>
+                            {% for skill in candidate.hard_skills %}
+                            <li>{{ skill }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <strong>Софт-скиллы:</strong>
+                        <ul>
+                            {% for skill in candidate.soft_skills %}
+                            <li>{{ skill }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <strong>Языки:</strong>
+                        <ul>
+                            {% for lang in candidate.languages %}
+                            <li>{{ lang }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <h4>Опыт работы</h4>
+                {% if candidate.work_experience %}
+                    {% for exp in candidate.work_experience %}
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5>{{ exp.company }} - {{ exp.position }}</h5>
+                            <p class="text-muted">
+                                {{ exp.start_date }} - {{ exp.end_date|default:"По настоящее время" }}
+                            </p>
+                            <p>{{ exp.description }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p>Опыт работы не указан</p>
+                {% endif %}
+            </div>
+
+            <div class="mt-4">
+                <h4>О себе</h4>
+                <p>{{ candidate.about_me|linebreaks|default:"Информация не указана" }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

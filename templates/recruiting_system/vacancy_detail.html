@@ -35,10 +35,18 @@
                     {% endif %}
                 {% endif %}
 
-                {% if request.user.user_type == 'recruiter' and vacancy.recruiter.user == request.user %}
+                {% if request.user.user_type == 'recruiter' and vacancy.recruiter.user == request.user or request.user.user_type == 'admin' %}
                 <div class="mt-3">
                     <a href="{% url 'recruiting_system:vacancy_edit' vacancy.pk %}" class="btn btn-warning">
                         Редактировать вакансию
+                    </a>
+                </div>
+                {% endif %}
+
+                {% if request.user.user_type == 'recruiter' %}
+                <div class="mt-3">
+                    <a href="{% url 'ai_assistant:analyze_candidates' vacancy.pk %}" class="btn btn-info">
+                        Анализ кандидатов с помощью AI
                     </a>
                 </div>
                 {% endif %}

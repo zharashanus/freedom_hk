@@ -51,6 +51,21 @@
                         <h6>Резюме:</h6>
                         <p>{{ profile.resume_text|linebreaks|default:"Резюме не заполнено" }}</p>
                     </div>
+
+                    <div class="mt-3">
+                        <h6>Опыт работы:</h6>
+                        {% if profile.work_experience %}
+                            {% for exp in profile.work_experience %}
+                                <div class="mb-3">
+                                    <strong>{{ exp.company }}</strong> - {{ exp.position }}<br>
+                                    <small>{{ exp.start_date }} - {{ exp.end_date|default:"По настоящее время" }}</small>
+                                    <p>{{ exp.description }}</p>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <p>Опыт работы не указан</p>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
@@ -59,6 +74,9 @@
                 <div class="card-body">
                     <h5 class="card-title">Действия</h5>
                     <div class="d-grid gap-2">
+                        <a href="{% url 'auth_freedom:edit_profile' %}" class="btn btn-warning">
+                            Редактировать профиль
+                        </a>
                         <a href="{% url 'recruiting_system:vacancy_list' %}" class="btn btn-primary">
                             Посмотреть вакансии компании
                         </a>

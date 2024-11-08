@@ -1,0 +1,82 @@
+{% extends 'auth_freedom/base.html' %}
+
+{% block title %}Список кандидатов{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Список кандидатов</h2>
+    
+    <!-- Фильтры -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label for="specialization" class="form-label">Специализация</label>
+                    <input type="text" class="form-control" id="specialization" name="specialization" 
+                           value="{{ request.GET.specialization|default:'' }}">
+                </div>
+                <div class="col-md-2">
+                    <label for="experience" class="form-label">Опыт от (лет)</label>
+                    <input type="number" class="form-control" id="experience" name="experience" 
+                           value="{{ request.GET.experience|default:'' }}">
+                </div>
+                <div class="col-md-3">
+                    <label for="level" class="form-label">Уровень</label>
+                    <select class="form-select" id="level" name="level">
+                        <option value="">Все</option>
+                        {% for value, label in level_choices %}
+                        <option value="{{ value }}" {% if request.GET.level == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="search_status" class="form-label">Статус поиска</label>
+                    <select class="form-select" id="search_status" name="search_status">
+                        <option value="">Все</option>
+                        {% for value, label in search_status_choices %}
+                        <option value="{{ value }}" {% if request.GET.search_status == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-1 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary">Найти</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Список кандидатов -->
+    <div class="row">
+        {% for candidate in candidates %}
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ candidate.first_name }} {{ candidate.last_name }}</h5>
+                    <p class="card-text">
+                        <strong>Специализация:</strong> {{ candidate.specialization }}<br>
+                        <strong>Опыт:</strong> {{ candidate.experience }} лет<br>
+                        <strong>Уровень:</strong> {{ candidate.get_level_display }}<br>
+                        <strong>Статус поиска:</strong> {{ candidate.get_search_status_display }}<br>
+                        <strong>Локация:</strong> {{ candidate.country }}, {{ candidate.region }}
+                    </p>
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'recruiting_system:candidate_detail' candidate.pk %}" 
+                           class="btn btn-primary">Подробнее</a>
+                        <a href="{% url 'ai_assistant:candidate_analysis' candidate.pk %}" 
+                           class="btn btn-info">AI Анализ</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <p>Кандидаты не найдены</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %} 

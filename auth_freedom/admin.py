@@ -18,6 +18,11 @@ class CustomUserAdmin(UserAdmin):
             form.base_fields['user_type'].choices = [('candidate', 'Кандидат')]
         return form
 
+class CandidateProfileAdmin(admin.ModelAdmin):
+    list_display = ('first_name', 'last_name', 'email', 'phone', 'specialization')
+    search_fields = ('first_name', 'last_name', 'email', 'phone')
+    list_filter = ('level', 'search_status', 'country', 'specialization')
+
 admin.site.register(User, CustomUserAdmin)
 admin.site.register(RecruiterProfile)
-admin.site.register(CandidateProfile)
+admin.site.register(CandidateProfile, CandidateProfileAdmin)

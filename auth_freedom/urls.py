@@ -9,4 +9,6 @@ urlpatterns = [
     path('register/', views.register_view, name='register'),
     path('logout/', views.logout_view, name='logout'),
     path('profile/', views.profile_view, name='profile'),
+    path('profile/edit/', views.edit_candidate_profile, name='edit_profile'),
+    path('api/bulk-register/', views.bulk_register_candidates, name='bulk_register_candidates'),
 ]

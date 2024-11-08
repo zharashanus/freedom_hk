@@ -1,13 +1,17 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .models import Vacancy, Application
+from .models import Vacancy, Application, CandidateProfile
 from .forms import VacancyForm, ApplicationForm
 
 @login_required
 def vacancy_list(request):
     vacancies = Vacancy.objects.filter(status='active')
-    return render(request, 'recruiting_system/vacancy_list.html', {'vacancies': vacancies})
+    context = {
+        'vacancies': vacancies,
+        'is_authenticated': request.user.is_authenticated
+    }
+    return render(request, 'recruiting_system/vacancy_list.html', context)
 
 @login_required
 def vacancy_detail(request, pk):
@@ -79,11 +83,15 @@ def vacancy_create(request):
 
 @login_required
 def vacancy_edit(request, pk):
-    if request.user.user_type != 'recruiter':
-        messages.error(request, 'Только рекрутеры могут редактировать вакансии')
+    if request.user.user_type not in ['recruiter', 'admin']:
+        messages.error(request, 'Только рекрутеры и администраторы могут редактировать вакансии')
         return redirect('recruiting_system:vacancy_list')
     
-    vacancy = get_object_or_404(Vacancy, pk=pk, recruiter__user=request.user)
+    # Для администраторов пропускаем проверку на принадлежность вакансии
+    if request.user.user_type == 'admin':
+        vacancy = get_object_or_404(Vacancy, pk=pk)
+    else:
+        vacancy = get_object_or_404(Vacancy, pk=pk, recruiter__user=request.user)
     
     if request.method == 'POST':
         form = VacancyForm(request.POST, instance=vacancy)
@@ -117,3 +125,43 @@ def update_application_status(request, pk):
             messages.error(request, 'Некорректный статус')
     
     return redirect('recruiting_system:application_detail', pk=pk)
+
+@login_required
+def candidate_list(request):
+    if request.user.user_type != 'recruiter':
+        messages.error(request, 'Доступ запрещен')
+        return redirect('recruiting_system:vacancy_list')
+    
+    candidates = CandidateProfile.objects.all()
+    
+    # Фильтрация
+    specialization = request.GET.get('specialization')
+    experience = request.GET.get('experience')
+    level = request.GET.get('level')
+    search_status = request.GET.get('search_status')
+    
+    if specialization:
+        candidates = candidates.filter(specialization__icontains=specialization)
+    if experience:
+        candidates = candidates.filter(experience__gte=experience)
+    if level:
+        candidates = candidates.filter(level=level)
+    if search_status:
+        candidates = candidates.filter(search_status=search_status)
+    
+    return render(request, 'recruiting_system/candidate_list.html', {
+        'candidates': candidates,
+        'level_choices': CandidateProfile.LEVEL_CHOICES,
+        'search_status_choices': CandidateProfile.SEARCH_STATUS_CHOICES,
+    })
+
+@login_required
+def candidate_detail(request, pk):
+    if request.user.user_type != 'recruiter':
+        messages.error(request, 'Доступ запрещен')
+        return redirect('recruiting_system:vacancy_list')
+    
+    candidate = get_object_or_404(CandidateProfile, pk=pk)
+    return render(request, 'recruiting_system/candidate_detail.html', {
+        'candidate': candidate
+    })

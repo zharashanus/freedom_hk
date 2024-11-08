@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'recruiting_system',
+    'ai_assistant',
 ]
 
 REST_FRAMEWORK = {
@@ -149,7 +150,10 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -160,3 +164,21 @@ AUTH_USER_MODEL = 'auth_freedom.User'
 
 LOGIN_URL = 'auth_freedom:login'
 LOGIN_REDIRECT_URL = 'auth_freedom:profile'
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'auth_freedom': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+    },
+}
+
+# Добавим настройки OpenAI
+OPENAI_API_KEY = 'your-api-key-here'

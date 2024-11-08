@@ -94,6 +94,7 @@ class CandidateProfile(models.Model):
     hard_skills = ArrayField(models.CharField(max_length=100), verbose_name="Технические навыки", default=list, blank=True)
     soft_skills = ArrayField(models.CharField(max_length=100), verbose_name="Софт-скиллы", default=list, blank=True)
     education = models.JSONField(verbose_name="Образование", default=dict)
+    work_experience = models.JSONField(verbose_name="Прошлые места работы", default=list, blank=True)
     projects = models.JSONField(verbose_name="Проекты", default=dict, blank=True)
     social_networks = models.JSONField(verbose_name="Социальные сети", default=dict, blank=True)
     video_presentation = models.URLField(verbose_name="Видео-презентация", blank=True, null=True)
@@ -102,6 +103,9 @@ class CandidateProfile(models.Model):
     level = models.CharField(max_length=20, choices=LEVEL_CHOICES, verbose_name="Уровень", default='no_experience')
     resume_text = models.TextField(verbose_name="Текст резюме", blank=True, default='')
     is_active = models.BooleanField(default=True, verbose_name="Активен")
+
+    def __str__(self):
+        return f"{self.first_name} {self.last_name}"
 
     class Meta:
         verbose_name = "Профиль кандидата"
@@ -124,9 +128,6 @@ def create_user_profile(sender, instance, created, **kwargs):
                 certifications=[],
                 languages=['Русский'],
                 desired_salary=0,
-                location='',
-                skills=[],
-                resume_text='',
                 hard_skills=[],
                 soft_skills=[],
                 gender='other',

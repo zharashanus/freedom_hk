@@ -5,4 +5,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('auth_freedom.urls')),
     path('recruiting/', include('recruiting_system.urls')),  # Добавляем это
+    path('ai/', include('ai_assistant.urls')),
 ]

@@ -14,7 +14,11 @@
                     <strong>ФИО:</strong> {{ application.candidate.user.get_full_name }}<br>
                     <strong>Опыт работы:</strong> {{ application.candidate.experience }} лет<br>
                     <strong>Специализация:</strong> {{ application.candidate.specialization }}<br>
-                    <strong>Уровень:</strong> {{ application.candidate.get_level_display }}
+                    <strong>Уровень:</strong> {{ application.candidate.get_level_display }}<br>
+                    <strong>Желаемая зарплата:</strong> {{ application.desired_salary }}<br>
+                    <strong>Местоположение:</strong> {{ application.current_location.country }}, {{ application.current_location.region }}<br>
+                    <strong>Готовность к переезду:</strong> {{ application.get_relocation_status_display }}<br>
+                    <strong>Оценка соответствия:</strong> {{ application.match_score }}%
                 </p>
                 {% else %}
                 <p><strong>Рекрутер:</strong> {{ application.vacancy.recruiter.user.get_full_name }}</p>
@@ -22,11 +26,15 @@
 
                 <p><strong>Статус заявки:</strong> {{ application.get_status_display }}</p>
                 <p><strong>Дата подачи:</strong> {{ application.created_at|date:"d.m.Y" }}</p>
+                <p><strong>Источник:</strong> {{ application.get_source_display }}</p>
 
                 <h4>Сопроводительное письмо:</h4>
                 <p>{{ application.cover_letter|linebreaks|default:"Не указано" }}</p>
 
                 {% if request.user.user_type == 'recruiter' %}
+                <h4>Заметки рекрутера:</h4>
+                <p>{{ application.notes|linebreaks|default:"Заметок нет" }}</p>
+
                 <form method="post" action="{% url 'recruiting_system:update_application_status' application.pk %}">
                     {% csrf_token %}
                     <div class="form-group">
@@ -39,7 +47,11 @@
                             {% endfor %}
                         </select>
                     </div>
-                    <button type="submit" class="btn btn-primary mt-3">Обновить статус</button>
+                    <div class="form-group mt-3">
+                        <label for="notes">Заметки:</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="4">{{ application.notes }}</textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary mt-3">Обновить</button>
                 </form>
                 {% endif %}
             </div>
