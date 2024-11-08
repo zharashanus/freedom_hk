@@ -1,0 +1,55 @@
+{% extends 'auth_freedom/base.html' %}
+
+{% block title %}Профиль кандидата{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Профиль кандидата</h2>
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">{{ profile.user.get_full_name|default:profile.user.username }}</h5>
+            <p class="card-text">
+                <strong>Специализация:</strong> {{ profile.specialization|default:"Не указано" }}<br>
+                <strong>Опыт работы:</strong> {{ profile.experience }} лет<br>
+                <strong>Уровень:</strong> {{ profile.get_level_display }}<br>
+                <strong>Страна:</strong> {{ profile.country|default:"Не указано" }}<br>
+                <strong>Регион:</strong> {{ profile.region|default:"Не указано" }}<br>
+                <strong>Желаемая зарплата:</strong> {{ profile.desired_salary }}<br>
+                <strong>Статус поиска:</strong> {{ profile.get_search_status_display }}<br>
+                <strong>Готовность к переезду:</strong> {{ profile.get_relocation_status_display }}<br>
+            </p>
+
+            <h6>Технические навыки:</h6>
+            <ul>
+                {% for skill in profile.hard_skills %}
+                    <li>{{ skill }}</li>
+                {% endfor %}
+            </ul>
+
+            <h6>Софт-скиллы:</h6>
+            <ul>
+                {% for skill in profile.soft_skills %}
+                    <li>{{ skill }}</li>
+                {% endfor %}
+            </ul>
+
+            <h6>Языки:</h6>
+            <ul>
+                {% for lang in profile.languages %}
+                    <li>{{ lang }}</li>
+                {% endfor %}
+            </ul>
+
+            <div class="mt-3">
+                <h6>О себе:</h6>
+                <p>{{ profile.about_me|linebreaks|default:"Информация не указана" }}</p>
+            </div>
+
+            <div class="mt-3">
+                <h6>Резюме:</h6>
+                <p>{{ profile.resume_text|linebreaks|default:"Резюме не заполнено" }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

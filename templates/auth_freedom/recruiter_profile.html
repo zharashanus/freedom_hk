@@ -1,0 +1,28 @@
+{% extends 'auth_freedom/base.html' %}
+
+{% block title %}Профиль рекрутера{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Профиль рекрутера</h2>
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">{{ profile.user.get_full_name|default:profile.user.username }}</h5>
+            <p class="card-text">
+                <strong>Компания:</strong> {{ profile.company|default:"Не указано" }}<br>
+                <strong>Специализация:</strong> {{ profile.specialization|default:"Не указано" }}<br>
+                <strong>Опыт работы:</strong> {{ profile.experience }} лет<br>
+                <strong>Регион:</strong> {{ profile.region|default:"Не указано" }}<br>
+                <strong>Успешные наймы:</strong> {{ profile.successful_hires }}<br>
+                <strong>Активные вакансии:</strong> {{ profile.active_vacancies }}
+            </p>
+            <h6>Языки:</h6>
+            <ul>
+                {% for lang in profile.languages %}
+                    <li>{{ lang }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %} 
