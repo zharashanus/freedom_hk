@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'auth_freedom',
     'rest_framework',
     'rest_framework_simplejwt',
+    'recruiting_system',
 ]
 
 REST_FRAMEWORK = {
