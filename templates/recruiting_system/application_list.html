@@ -1,0 +1,34 @@
+{% extends 'auth_freedom/base.html' %}
+
+{% block title %}Список заявок{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Список заявок</h2>
+    <div class="row">
+        {% for application in applications %}
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ application.vacancy.title }}</h5>
+                    <p class="card-text">
+                        {% if request.user.user_type == 'recruiter' %}
+                        <strong>Кандидат:</strong> {{ application.candidate.user.get_full_name }}<br>
+                        {% else %}
+                        <strong>Рекрутер:</strong> {{ application.vacancy.recruiter.user.get_full_name }}<br>
+                        {% endif %}
+                        <strong>Статус:</strong> {{ application.get_status_display }}<br>
+                        <strong>Дата подачи:</strong> {{ application.created_at|date:"d.m.Y" }}
+                    </p>
+                    <a href="{% url 'recruiting_system:application_detail' application.pk %}" class="btn btn-primary">Подробнее</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <p>Нет доступных заявок</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %} 

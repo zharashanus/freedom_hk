@@ -1,0 +1,36 @@
+{% extends 'auth_freedom/base.html' %}
+
+{% block title %}Список вакансий{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Список вакансий</h2>
+    {% if request.user.user_type == 'recruiter' %}
+    <div class="mb-3">
+        <a href="{% url 'recruiting_system:vacancy_create' %}" class="btn btn-primary">Создать вакансию</a>
+    </div>
+    {% endif %}
+    
+    <div class="row">
+        {% for vacancy in vacancies %}
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ vacancy.title }}</h5>
+                    <p class="card-text">
+                        <strong>Рекрутер:</strong> {{ vacancy.recruiter.user.get_full_name }}<br>
+                        <strong>Статус:</strong> {{ vacancy.get_status_display }}<br>
+                        <strong>Создано:</strong> {{ vacancy.created_at|date:"d.m.Y" }}
+                    </p>
+                    <a href="{% url 'recruiting_system:vacancy_detail' vacancy.pk %}" class="btn btn-primary">Подробнее</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <p>Нет доступных вакансий</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

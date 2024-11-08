@@ -1,0 +1,49 @@
+{% extends 'auth_freedom/base.html' %}
+
+{% block title %}Заявка на вакансию{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card">
+        <div class="card-body">
+            <h2 class="card-title">{{ application.vacancy.title }}</h2>
+            <div class="card-text">
+                {% if request.user.user_type == 'recruiter' %}
+                <h4>Информация о кандидате:</h4>
+                <p>
+                    <strong>ФИО:</strong> {{ application.candidate.user.get_full_name }}<br>
+                    <strong>Опыт работы:</strong> {{ application.candidate.experience }} лет<br>
+                    <strong>Специализация:</strong> {{ application.candidate.specialization }}<br>
+                    <strong>Уровень:</strong> {{ application.candidate.get_level_display }}
+                </p>
+                {% else %}
+                <p><strong>Рекрутер:</strong> {{ application.vacancy.recruiter.user.get_full_name }}</p>
+                {% endif %}
+
+                <p><strong>Статус заявки:</strong> {{ application.get_status_display }}</p>
+                <p><strong>Дата подачи:</strong> {{ application.created_at|date:"d.m.Y" }}</p>
+
+                <h4>Сопроводительное письмо:</h4>
+                <p>{{ application.cover_letter|linebreaks|default:"Не указано" }}</p>
+
+                {% if request.user.user_type == 'recruiter' %}
+                <form method="post" action="{% url 'recruiting_system:update_application_status' application.pk %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="status">Изменить статус:</label>
+                        <select class="form-control" id="status" name="status">
+                            {% for status, label in application.STATUS_CHOICES %}
+                            <option value="{{ status }}" {% if application.status == status %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary mt-3">Обновить статус</button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

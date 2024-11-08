@@ -1,0 +1,49 @@
+{% extends 'auth_freedom/base.html' %}
+
+{% block title %}{{ vacancy.title }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card">
+        <div class="card-body">
+            <h2 class="card-title">{{ vacancy.title }}</h2>
+            <div class="card-text">
+                <p><strong>Рекрутер:</strong> {{ vacancy.recruiter.user.get_full_name }}</p>
+                <p><strong>Статус:</strong> {{ vacancy.get_status_display }}</p>
+                <p><strong>Создано:</strong> {{ vacancy.created_at|date:"d.m.Y" }}</p>
+                
+                <h4>Описание вакансии:</h4>
+                <p>{{ vacancy.description|linebreaks }}</p>
+                
+                <h4>Требования:</h4>
+                <p>{{ vacancy.requirements|linebreaks }}</p>
+
+                {% if request.user.user_type == 'candidate' %}
+                    {% if not has_applied %}
+                    <form method="post" action="{% url 'recruiting_system:apply_vacancy' vacancy.pk %}">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="cover_letter">Сопроводительное письмо:</label>
+                            <textarea class="form-control" id="cover_letter" name="cover_letter" rows="4"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary mt-3">Откликнуться</button>
+                    </form>
+                    {% else %}
+                    <div class="alert alert-info">
+                        Вы уже откликнулись на эту вакансию
+                    </div>
+                    {% endif %}
+                {% endif %}
+
+                {% if request.user.user_type == 'recruiter' and vacancy.recruiter.user == request.user %}
+                <div class="mt-3">
+                    <a href="{% url 'recruiting_system:vacancy_edit' vacancy.pk %}" class="btn btn-warning">
+                        Редактировать вакансию
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

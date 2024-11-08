@@ -5,23 +5,45 @@
 {% block content %}
 <div class="container">
     <h2>Профиль рекрутера</h2>
-    <div class="card">
-        <div class="card-body">
-            <h5 class="card-title">{{ profile.user.get_full_name|default:profile.user.username }}</h5>
-            <p class="card-text">
-                <strong>Компания:</strong> {{ profile.company|default:"Не указано" }}<br>
-                <strong>Специализация:</strong> {{ profile.specialization|default:"Не указано" }}<br>
-                <strong>Опыт работы:</strong> {{ profile.experience }} лет<br>
-                <strong>Регион:</strong> {{ profile.region|default:"Не указано" }}<br>
-                <strong>Успешные наймы:</strong> {{ profile.successful_hires }}<br>
-                <strong>Активные вакансии:</strong> {{ profile.active_vacancies }}
-            </p>
-            <h6>Языки:</h6>
-            <ul>
-                {% for lang in profile.languages %}
-                    <li>{{ lang }}</li>
-                {% endfor %}
-            </ul>
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">{{ profile.user.get_full_name|default:profile.user.username }}</h5>
+                    <p class="card-text">
+                        <strong>Компания:</strong> {{ profile.company|default:"Не указано" }}<br>
+                        <strong>Специализация:</strong> {{ profile.specialization|default:"Не указано" }}<br>
+                        <strong>Опыт работы:</strong> {{ profile.experience }} лет<br>
+                        <strong>Регион:</strong> {{ profile.region|default:"Не указано" }}<br>
+                        <strong>Успешные наймы:</strong> {{ profile.successful_hires }}<br>
+                        <strong>Активные вакансии:</strong> {{ profile.active_vacancies }}
+                    </p>
+                    <h6>Языки:</h6>
+                    <ul>
+                        {% for lang in profile.languages %}
+                            <li>{{ lang }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Управление вакансиями</h5>
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'recruiting_system:vacancy_create' %}" class="btn btn-success">
+                            Создать новую вакансию
+                        </a>
+                        <a href="{% url 'recruiting_system:vacancy_list' %}" class="btn btn-primary">
+                            Управление вакансиями
+                        </a>
+                        <a href="{% url 'recruiting_system:application_list' %}" class="btn btn-outline-primary">
+                            Отклики кандидатов
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
