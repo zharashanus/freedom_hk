@@ -45,7 +45,7 @@
 
                 {% if request.user.user_type == 'recruiter' %}
                 <div class="mt-3">
-                    <a href="{% url 'ai_assistant:analyze_candidates' vacancy.pk %}" class="btn btn-info">
+                    <a href="{% url 'analyze_candidates:analyze_candidates' vacancy.pk %}" class="btn btn-info">
                         Анализ кандидатов с помощью AI
                     </a>
                 </div>

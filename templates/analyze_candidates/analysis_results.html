@@ -1,0 +1,182 @@
+{% extends 'auth_freedom/base.html' %}
+
+{% block title %}Анализ кандидатов{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Результаты анализа кандидатов на вакансию "{{ vacancy.title }}"</h2>
+    
+    {% if messages %}
+    <div class="messages mb-4">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if request.user.is_superuser %}
+    <div class="debug-info mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Debug Information</h5>
+            </div>
+            <div class="card-body">
+                <p>Total Candidates: {{ all_candidates|length }}</p>
+                <p>Total Analyses: {{ analyses|length }}</p>
+                <p>Vacancy ID: {{ vacancy.id }}</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="row">
+        {% for analysis in analyses %}
+            <div class="col-md-6 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-header bg-light">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="candidate-name">
+                                <h5 class="card-title">
+                                    {% if analysis.candidate.user %}
+                                        {{ analysis.candidate.user.get_full_name }}
+                                    {% else %}
+                                        Имя не указано
+                                    {% endif %}
+                                </h5>
+                                {% if analysis.candidate.specialization %}
+                                    <small class="text-muted">{{ analysis.candidate.specialization }}</small>
+                                {% endif %}
+                            </div>
+                            <span class="badge {% if analysis.match_score >= 75 %}bg-success{% elif analysis.match_score >= 50 %}bg-warning{% else %}bg-danger{% endif %}">
+                                {{ analysis.match_score }}%
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="card-body">
+                        <div class="match-score mb-3">
+                            <label class="form-label">Общий показатель соответствия:</label>
+                            <div class="progress">
+                                <div class="progress-bar {% if analysis.match_score >= 75 %}bg-success{% elif analysis.match_score >= 50 %}bg-warning{% else %}bg-danger{% endif %}" 
+                                     role="progressbar" 
+                                     style="width: {{ analysis.match_score }}%" 
+                                     aria-valuenow="{{ analysis.match_score }}" 
+                                     aria-valuemin="0" 
+                                     aria-valuemax="100">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="reputation mb-3">
+                            <label class="form-label">Репутационный рейтинг:</label>
+                            <div class="h5">{{ analysis.reputation_score }}/100</div>
+                        </div>
+
+                        {% if analysis.feedback %}
+                        <div class="feedback mt-3">
+                            <h6 class="border-bottom pb-2">Комментарий ИИ:</h6>
+                            <p>{{ analysis.feedback }}</p>
+                        </div>
+                        {% endif %}
+
+                        <div class="mt-3 text-end">
+                            <a href="{% url 'recruiting_system:candidate_detail' analysis.candidate.pk %}" 
+                               class="btn btn-primary btn-sm">
+                                <i class="fas fa-user-circle me-1"></i> Просмотреть профиль
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Подходящие кандидаты не найдены
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="mt-4">
+        <a href="{% url 'recruiting_system:vacancy_list' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Вернуться к списку вакансий
+        </a>
+    </div>
+</div>
+
+<style>
+/* Оставляем оригинальные стили */
+.card {
+    transition: transform 0.2s;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+.candidate-name {
+    max-width: 80%;
+}
+
+.candidate-name h5 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.badge {
+    padding: 0.5em 1em;
+    font-weight: 500;
+}
+
+.progress {
+    height: 8px;
+    border-radius: 4px;
+    background-color: #e9ecef;
+}
+
+.progress-bar {
+    border-radius: 4px;
+}
+
+.detailed-scores ul li {
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.feedback p {
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+/* Добавляем стили для отладочной информации */
+.debug-info {
+    font-family: monospace;
+    font-size: 0.9rem;
+}
+
+.debug-info .card {
+    border: 1px solid #dee2e6;
+}
+
+.debug-info .card-header {
+    background-color: #f8f9fa;
+    color: #6c757d;
+}
+</style>
+{% endblock %}

@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'recruiting_system',
-    'ai_assistant',
+    'analyze_candidates',
     'convertor_to_json',
     'django_celery_results',
     'django_celery_beat',
@@ -200,6 +200,11 @@ LOGGING = {
         'celery': {
             'handlers': ['console', 'file'],
             'level': 'DEBUG',
+        },
+        'analyze_candidates': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+            'propagate': True,
         },
     },
 }

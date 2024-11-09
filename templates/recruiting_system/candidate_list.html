@@ -66,7 +66,7 @@
                     <div class="d-flex justify-content-between">
                         <a href="{% url 'recruiting_system:candidate_detail' candidate.pk %}" 
                            class="btn btn-primary">Подробнее</a>
-                        <a href="{% url 'ai_assistant:candidate_analysis' candidate.pk %}" 
+                        <a href="{% url 'analyze_candidates:analyze_candidates' candidate.pk %}" 
                            class="btn btn-info">AI Анализ</a>
                     </div>
                 </div>
