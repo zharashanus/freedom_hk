@@ -7,6 +7,10 @@ import os
 import logging
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
+from django.core.cache import cache
+from datetime import timedelta
+from django.utils import timezone
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -14,43 +18,59 @@ class AIMatchingService:
     def __init__(self):
         self.client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
         self.executor = ThreadPoolExecutor(max_workers=3)
+        self.cache_timeout = 60 * 60 * 24  # 24 часа
 
     def analyze_candidate_for_vacancy(self, vacancy, candidate):
         try:
-            # Проверяем существующий анализ
+            # Проверяем кэш
+            cache_key = f'analysis_{vacancy.id}_{candidate.id}'
+            cached_result = cache.get(cache_key)
+            if cached_result:
+                return cached_result
+                
+            # Проверяем существующий анализ в БД
             existing_analysis = AIAnalysis.objects.filter(
                 vacancy=vacancy,
-                candidate=candidate
+                candidate=candidate,
+                created_at__gte=timezone.now() - timedelta(days=7)
             ).first()
             
             if existing_analysis:
+                # Кэшируем результат
+                cache.set(cache_key, existing_analysis, self.cache_timeout)
                 return existing_analysis
 
-            # Подготовка данных
-            vacancy_data = self._prepare_vacancy_data(vacancy)
-            candidate_data = self._prepare_candidate_data(candidate)
-
-            # Выполняем анализ с таймаутом
-            response = self._get_ai_response(vacancy_data, candidate_data)
-            
-            if not response:
-                logger.error(f"Failed to get AI response for candidate {candidate.id}")
-                return None
-
-            match_score = self._extract_match_score(response.choices[0].message.content)
-            
-            analysis = AIAnalysis.objects.create(
-                vacancy=vacancy,
-                candidate=candidate,
-                match_score=match_score,
-                feedback=response.choices[0].message.content
-            )
-            
+            # Выполняем новый анализ
+            analysis = self._perform_analysis(vacancy, candidate)
+            if analysis:
+                cache.set(cache_key, analysis, self.cache_timeout)
             return analysis
             
         except Exception as e:
             logger.error(f"Error in AI analysis: {str(e)}")
             return None
+            
+    def _perform_analysis(self, vacancy, candidate):
+        vacancy_data = self._prepare_vacancy_data(vacancy)
+        candidate_data = self._prepare_candidate_data(candidate)
+        
+        for attempt in range(3):  # Retry механизм
+            try:
+                response = self._get_ai_response(vacancy_data, candidate_data)
+                if response:
+                    match_score = self._extract_match_score(response.choices[0].message.content)
+                    return AIAnalysis.objects.create(
+                        vacancy=vacancy,
+                        candidate=candidate,
+                        match_score=match_score,
+                        feedback=response.choices[0].message.content
+                    )
+            except Exception as e:
+                logger.error(f"Analysis attempt {attempt + 1} failed: {str(e)}")
+                if attempt < 2:
+                    time.sleep(2 * (attempt + 1))
+                    
+        return None
 
     def _prepare_vacancy_data(self, vacancy):
         return {

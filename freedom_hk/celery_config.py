@@ -1,0 +1,10 @@
+broker_url = 'redis://localhost:6379/0'
+result_backend = 'redis://localhost:6379/0'
+task_track_started = True
+worker_max_tasks_per_child = 1000
+worker_prefetch_multiplier = 1
+task_time_limit = 600
+broker_connection_retry_on_startup = True
+broker_connection_max_retries = 10
+worker_cancel_long_running_tasks_on_connection_loss = True
+task_soft_time_limit = 300 

@@ -1,0 +1,69 @@
+{% extends 'auth_freedom/base.html' %}
+
+{% block title %}Статус загрузки{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Статус загрузки</h2>
+    
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Общая информация</h5>
+            <p>Статус: <span class="badge {% if bulk_upload.status == 'completed' %}bg-success{% elif bulk_upload.status == 'failed' %}bg-danger{% else %}bg-warning{% endif %}">
+                {{ bulk_upload.get_status_display }}
+            </span></p>
+            <p>Всего файлов: {{ bulk_upload.total_files }}</p>
+            <p>Обработано: {{ bulk_upload.processed_files }}</p>
+            <p>Ошибок: {{ bulk_upload.failed_files }}</p>
+            <p>Дата загрузки: {{ bulk_upload.upload_date|date:"d.m.Y H:i:s" }}</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Файлы</h5>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Имя файла</th>
+                            <th>Тип</th>
+                            <th>Статус</th>
+                            <th>Извлеченные данные</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for file in resume_files %}
+                        <tr>
+                            <td>{{ file.original_filename }}</td>
+                            <td>{{ file.get_file_type_display }}</td>
+                            <td>
+                                <span class="badge {% if file.status == 'converted' %}bg-success{% elif file.status == 'failed' %}bg-danger{% else %}bg-warning{% endif %}">
+                                    {{ file.get_status_display }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if file.status == 'converted' %}
+                                    <ul class="list-unstyled mb-0">
+                                        {% if file.extracted_name %}<li>Имя: {{ file.extracted_name }}</li>{% endif %}
+                                        {% if file.extracted_email %}<li>Email: {{ file.extracted_email }}</li>{% endif %}
+                                        {% if file.extracted_phone %}<li>Телефон: {{ file.extracted_phone }}</li>{% endif %}
+                                        {% if file.extracted_experience_years %}<li>Опыт: {{ file.extracted_experience_years }} лет</li>{% endif %}
+                                    </ul>
+                                {% elif file.status == 'failed' %}
+                                    <span class="text-danger">{{ file.error_message }}</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <a href="{% url 'convertor_to_json:upload_resumes' %}" class="btn btn-primary">Загрузить еще</a>
+    </div>
+</div>
+{% endblock %} 

@@ -1,10 +1,15 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import BulkUpload, ResumeFile
 from .tasks import process_resume_files
-from django.core.files.storage import default_storage
+from celery.exceptions import OperationalError
+from redis.exceptions import ConnectionError as RedisConnectionError
+from freedom_hk.celery import app
 import os
+import logging
+
+logger = logging.getLogger(__name__)
 
 @login_required
 def upload_resumes(request):
@@ -38,12 +43,41 @@ def upload_resumes(request):
                 original_filename=file.name
             )
         
-        # Запуск асинхронной задачи для обработки файлов
-        process_resume_files.delay(bulk_upload.id)
-        
-        messages.success(request, 'Файлы успешно загружены и поставлены в очередь на обработку')
+        try:
+            if not app.conf.broker_connection_retry_on_startup:
+                raise OperationalError("Celery broker connection not available")
+            
+            task = process_resume_files.apply_async(
+                args=[bulk_upload.id],
+                countdown=1,
+                retry=True,
+                retry_policy={
+                    'max_retries': 3,
+                    'interval_start': 0,
+                    'interval_step': 0.2,
+                    'interval_max': 0.5,
+                }
+            )
+            logger.info(f"Task created successfully with id: {task.id}")
+            
+        except (OperationalError, RedisConnectionError) as e:
+            logger.error(f"Redis connection error: {str(e)}")
+            # Попробуем переподключиться к Redis
+            try:
+                app.conf.broker_connection_retry_on_startup = True
+                task = process_resume_files.apply_async(args=[bulk_upload.id])
+                logger.info(f"Task created successfully after retry with id: {task.id}")
+            except Exception as retry_error:
+                logger.error(f"Retry failed, falling back to synchronous processing: {str(retry_error)}")
+                process_resume_files(bulk_upload.id)
+                messages.warning(request, 'Файлы обработаны синхронно из-за проблем с подключением')
+            
+        except Exception as e:
+            messages.error(request, f'Ошибка при загрузке файлов: {str(e)}')
+            return redirect('convertor_to_json:upload_resumes')
+            
         return redirect('convertor_to_json:upload_status', bulk_upload.id)
-        
+            
     return render(request, 'convertor_to_json/upload_form.html')
 
 @login_required
