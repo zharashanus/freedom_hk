@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recruitment Registration Page</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body, html {
+            height: 100%;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .left {
+            background-color: #4FB84F;
+            color: white;
+            width: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 20px;
+            position: relative;
+        }
+
+        .left h1 {
+            font-size: 24px;
+            line-height: 1.4;
+            text-align: center;
+            max-width: 80%;
+            margin-top: 100px;
+            margin-bottom: 20px;
+        }
+
+        .right {
+            width: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .logo {
+            position: absolute;
+            top: 40px;
+            left: 20px;
+        }
+
+        .logo img {
+            width: 120px; /* Adjust width as needed */
+            height: auto;
+        }
+
+        .form-container {
+            width: 80%;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .progress-bar {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .progress-bar div {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background-color: #4FB84F;
+            color: white;
+            text-align: center;
+            line-height: 25px;
+            font-size: 14px;
+            margin: 0 5px;
+        }
+
+        .progress-bar .line {
+            height: 2px;
+            width: 40px;
+            background-color: #ccc;
+        }
+
+        .form-container h2 {
+            margin-bottom: 10px;
+        }
+
+        .form-container form {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .form-container input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 16px ;
+        }
+
+        .password-field {
+            position: relative;
+            width: 100%;
+        }
+
+        .password-field input {
+            width: 100%;
+        }
+
+        .password-field .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+        }
+
+        .form-container button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4FB84F;
+            color: white;
+            border: none;
+            border-radius: 16px ;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .top-buttons {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+        }
+
+        .top-buttons button {
+            padding: 8px 16px;
+            margin-left: 10px;
+            border: none;
+            border-radius: 16px ;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .top-buttons .login {
+            background: transparent;
+            border: 1px solid #4FB84F;
+            color: #73a03a;
+        }
+
+        .top-buttons .register {
+            background: #4FB84F;
+            color: white;
+        }
+
+        .illustration {
+            width: auto;
+            height: auto;
+            margin-top: 30px;
+        }
+
+        .illustration img {
+            width: 500px; /* Set a smaller width for the image */
+            height: auto; /* Maintain the aspect ratio */
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="left">
+        <div class="logo">
+            <img src="pics/logo.png" alt="Freedom Logo"> <!-- Replace 'freedom_logo.png' with your image path -->
+        </div>
+        <h1>Идеальная работа начинается с точного подбора</h1>
+        <div class="illustration">
+            <img src="pics/pic.png" alt="Illustration"> <!-- Replace 'pic.png' with your illustration image path -->
+        </div>
+    </div>
+    <div class="right">
+        <div class="top-buttons">
+            <button class="login">Войти</button>
+            <button class="register">Зарегистрироваться</button>
+        </div>
+        <div class="form-container">
+            <div class="progress-bar">
+                <div>1</div>
+                <div class="line"></div>
+                <div>2</div>
+                <div class="line"></div>
+                <div>3</div>
+            </div>
+            <h2>Регистрация</h2>
+            <p style="font-size: 14px; color: #666;">Зарегистрируйтесь через e-mail</p>
+            <form>
+                <input type="text" placeholder="Логин" required>
+                <input type="text" placeholder="Фамилия" required>
+                <input type="text" placeholder="Имя" required>
+                <input type="email" placeholder="E-mail" required>
+                <div class="password-field">
+                    <input type="password" placeholder="Пароль" required>
+                </div>
+                <div class="password-field">
+                    <input type="password" placeholder="Подтвердите пароль" required>
+                </div>
+                <input type="tel" placeholder="Номер телефона" required>
+                <input type="text" placeholder="Пол" required>
+                <input type="date" placeholder="Дата рождения" required>
+                <button type="submit">Далее</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

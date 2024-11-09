@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mass Resume Upload</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<style>/* General reset and styles */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f5f5f5;
+      }
+      
+      /* Container for layout */
+      .container {
+        display: flex;
+      }
+      
+      /* Sidebar styling */
+      .sidebar {
+        width: 250px;
+        background-color: #fff;
+        padding: 20px;
+        border-right: 1px solid #ddd;
+      }
+      
+      .logo {
+        width: 80%;
+        margin-bottom: 20px;
+      }
+      
+      .sidebar nav ul {
+        list-style: none;
+      }
+      
+      .sidebar nav ul li {
+        margin-bottom: 15px;
+      }
+      
+      .sidebar nav ul li a {
+        text-decoration: none;
+        font-size: 16px;
+        color: #333;
+      }
+      
+      .sidebar nav ul li a.active {
+        background-color: #4caf50;
+        color: #fff;
+        padding: 10px;
+        border-radius: 8px;
+        display: block;
+      }
+      
+      /* Main content styling */
+      .main-content {
+        flex-grow: 1;
+        padding: 20px;
+      }
+      
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+      
+      .search {
+        width: 300px;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+      }
+      
+      .user-info {
+        display: flex;
+        align-items: center;
+      }
+      
+      .notification {
+        font-size: 20px;
+        margin-right: 20px;
+      }
+      
+      .user-details {
+        display: flex;
+        align-items: center;
+      }
+      
+      .user-name {
+        font-size: 16px;
+        margin-right: 10px;
+      }
+      
+      .user-role {
+        font-size: 14px;
+        color: #888;
+        margin-right: 10px;
+      }
+      
+      .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+      }
+      
+      /* Content area */
+      .content {
+        text-align: center;
+      }
+      
+      .title {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 20px;
+      }
+      
+      .upload-box {
+        width: 80%;
+        height: 200px;
+        margin: 0 auto;
+        border: 2px dashed #ddd;
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        color: #666;
+      }
+      
+      .upload-icon {
+        font-size: 30px;
+        margin-bottom: 10px;
+      }
+      
+      .upload-box p {
+        font-size: 16px;
+      }
+      
+      .upload-box a {
+        color: #4caf50;
+        text-decoration: none;
+      }
+      
+      .upload-button {
+        margin-top: 20px;
+        padding: 10px 20px;
+        background-color: #4caf50;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 16px;
+      }
+      /* Sidebar Styling */
+      .sidebar {
+        width: 300px;
+        background-color: #fff;
+        padding: 20px;
+        border-right: 1px solid #ddd;
+        height: 100vh; /* Full viewport height */
+    }
+      
+      .logo {
+        width: 142px;
+        height: 64px;
+        margin-bottom: 40px;
+      }
+      
+      .menu {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      
+      .menu-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        border-radius: 16px;
+        color: #000;
+        font-family: "Roboto-Regular", sans-serif;
+        font-size: 16px;
+        font-weight: 400;
+        text-decoration: none;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+      
+      .menu-item img {
+        width: 20px;
+        height: 20px;
+      }
+      
+      .menu-item:hover {
+        background-color: #f0f0f0;
+      }
+      
+      .menu-item.active,
+      .menu-item.upload-resume {
+        background-color: #4caf50;
+        color: #fff;
+      }
+      
+      .menu-item.upload-resume {
+        margin-top: 20px;
+      }
+      </style>
+<body>
+  <div class="container">
+    <div class="sidebar">
+        <img class="logo" src="pics/logo2.png" alt="Freedom Holding Corp Logo">
+        <nav class="menu">
+          <div class="menu-item active">
+            <img src="../../pics/recruiter_profile/analytics.png" alt="Analytics" />
+            <span>Аналитика</span>
+          </div>
+          <div class="menu-item">
+            <img src="pics/recruiter_profile/people.png" alt="Candidate View" />
+            <span>Просмотр кандидатов</span>
+          </div>
+          <div class="menu-item">
+            <img src="./pics/recruiter_profile/clock.png" alt="Activity Feed" />
+            <span>Лента активности</span>
+          </div>
+          <div class="menu-item">
+            <img src="pics/recruiter_profile/copy.png" alt="Vacancy Management" />
+            <span>Управление вакансиями</span>
+          </div>
+          <div class="menu-item">
+            <img src="pics/recruiter_profile/add.png" alt="Candidate Responses" />
+            <span>Отклики кандидатов</span>
+          </div>
+          <div class="menu-item upload-resume">
+            <img src="pics/recruiter_profile/comp.png" alt="Resume Upload" />
+            <span>Загрузка резюме</span>
+          </div>
+        </nav>
+      </div>
+      
+    
+    <main class="main-content">
+      <header class="header">
+        <input type="text" placeholder="Поиск по ИНЖ" class="search">
+        <div class="user-info">
+          <span class="notification">🔔</span>
+          <div class="user-details">
+            <span class="user-name">Иванов Иван</span>
+            <span class="user-role">Менеджер</span>
+            <img src="user-profile.png" alt="User Profile" class="user-avatar">
+          </div>
+        </div>
+      </header>
+      
+      <section class="content">
+        <h1 class="title">Массовая загрузка резюме</h1>
+        <div class="upload-box">
+          <span class="upload-icon">⬇️</span>
+          <p>Перетащите сюда файлы или <a href="#">выберите</a></p>
+        </div>
+        <button class="upload-button">Загрузить</button>
+      </section>
+    </main>
+  </div>
+</body>
+</html>
