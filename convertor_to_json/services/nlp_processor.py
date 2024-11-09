@@ -68,6 +68,11 @@ class NLPProcessor:
             
             if gpt_data:
                 parsed_data.update(gpt_data)
+                # Добавляем логирование для about_me
+                logger.info(f"About me before extraction: {parsed_data.get('about_me', 'Not found')}")
+                about_me = self._extract_about_me(parsed_data)
+                parsed_data['about_me'] = about_me
+                logger.info(f"About me after extraction: {about_me[:100]}...")
             else:
                 logger.warning("GPT-4 analysis returned no data")
             
@@ -236,7 +241,7 @@ class NLPProcessor:
                 'phone': personal_info['phone'],
                 'gender': personal_info['gender'],
                 'birth_date': personal_info['birth_date'],
-                'about': personal_info['about'],
+                'about_me': personal_info['about'],
                 'currently_employed': personal_info['currently_employed'],
                 'experience_years': self._extract_experience_years(data),
                 'specialization': self._extract_specialization(data),
@@ -274,11 +279,12 @@ class NLPProcessor:
     def _extract_personal_info(self, data):
         """Извлекает персональную информацию"""
         if 'personal_info' in data:
+            about_text = data['personal_info'].get('about', '')  # Получаем текст из поля 'about'
             return {
                 'gender': data['personal_info'].get('gender', ''),
                 'birth_date': data['personal_info'].get('birth_date', ''),
                 'phone': data['personal_info'].get('phone', ''),
-                'about': data.get('about', ''),
+                'about': about_text,  # Сохраняем как 'about'
                 'currently_employed': data['professional_info'].get('currently_employed', False),
                 'country': data['personal_info'].get('location', {}).get('country', 'Казахстан'),
                 'region': data['personal_info'].get('location', {}).get('region', ''),
@@ -366,3 +372,28 @@ class NLPProcessor:
         if 'education' in data and 'certifications' in data['education']:
             return data['education']['certifications']
         return data.get('certifications', [])
+
+    def _extract_about_me(self, data):
+        """Извлекает информацию о себе"""
+        logger.info(f"Extracting about_me from data: {data.keys()}")
+        
+        if isinstance(data, dict):
+            if 'personal_info' in data:
+                logger.info(f"Found personal_info: {data['personal_info'].keys()}")
+                if 'about_me' in data['personal_info']:
+                    about_me = data['personal_info']['about_me']
+                    logger.info(f"Found about_me in personal_info: {about_me[:100]}...")
+                    return about_me
+            
+            if 'about_me' in data:
+                about_me = data['about_me']
+                logger.info(f"Found about_me in root: {about_me[:100]}...")
+                return about_me
+                
+            if 'description' in data:
+                about_me = data['description']
+                logger.info(f"Found description instead of about_me: {about_me[:100]}...")
+                return about_me
+        
+        logger.warning("No about_me information found in data")
+        return ''

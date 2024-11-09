@@ -18,9 +18,22 @@
                         Поддерживаемые форматы: PDF, DOC, DOCX, PPTX, TXT
                     </div>
                 </div>
+                <div class="progress mb-3 d-none" id="uploadProgress">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                         role="progressbar" style="width: 0%">
+                        0%
+                    </div>
+                </div>
                 <button type="submit" class="btn btn-primary">Загрузить</button>
             </form>
         </div>
     </div>
 </div>
+
+<script>
+document.querySelector('form').addEventListener('submit', function(e) {
+    document.getElementById('uploadProgress').classList.remove('d-none');
+    // Обновление прогресса через WebSocket
+});
+</script>
 {% endblock %} 

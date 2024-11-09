@@ -31,7 +31,7 @@ class CandidateCreator:
             profile.phone = parsed_data.get('phone', '')
             profile.birth_date = datetime.strptime(parsed_data.get('birth_date', '2000-01-01'), '%Y-%m-%d')
             profile.gender = parsed_data.get('gender', 'other')
-            profile.about_me = parsed_data.get('about', '')
+            profile.about_me = parsed_data.get('about_me', '')
             profile.specialization = parsed_data.get('specialization', '')
             profile.experience = parsed_data.get('experience_years', 0)
             profile.country = parsed_data.get('country', 'Казахстан')

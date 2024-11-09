@@ -77,3 +77,15 @@ class TXTParser(BaseParser):
     def _extract_text(self, file_path):
         with open(file_path, 'r', encoding='utf-8') as file:
             return file.read()
+
+class BaseParser:
+    def _extract_text(self, file_path):
+        # Используем потоковое чтение для больших файлов
+        chunk_size = 1024 * 1024  # 1MB chunks
+        text = []
+        
+        with open(file_path, 'rb') as file:
+            while chunk := file.read(chunk_size):
+                text.append(self._process_chunk(chunk))
+                
+        return ''.join(text)

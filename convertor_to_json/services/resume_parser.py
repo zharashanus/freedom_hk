@@ -29,7 +29,8 @@ class ResumeParser:
                 'languages': processed_data.get('languages', ['Русский'])[:5],
                 'desired_salary': processed_data.get('desired_salary', 0),
                 'location': processed_data.get('location', {'country': 'Казахстан'}),
-                'certifications': []
+                'certifications': [],
+                'about_me': processed_data.get('about_me', '')[:1000],
             }
             
         except Exception as e:
@@ -52,5 +53,6 @@ class ResumeParser:
             'languages': ['Русский'],
             'desired_salary': 0,
             'location': {'country': ''},
-            'certifications': []
+            'certifications': [],
+            'about_me': '',
         }

@@ -89,6 +89,10 @@ class ResumeFile(models.Model):
         default=list,
         blank=True
     )
+    extracted_about_me = models.TextField(
+        verbose_name="О себе",
+        blank=True
+    )
     
     created_candidate = models.ForeignKey(
         CandidateProfile,
