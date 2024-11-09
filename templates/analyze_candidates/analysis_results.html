@@ -6,30 +6,42 @@
 <div class="container mt-4">
     <h2 class="mb-4">Результаты анализа кандидатов на вакансию "{{ vacancy.title }}"</h2>
     
-    {% if messages %}
-    <div class="messages mb-4">
-        {% for message in messages %}
-        <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
-            {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-        {% endfor %}
+    <div class="d-flex justify-content-end mb-4">
+        <form method="POST" action="{% url 'analyze_candidates:analyze_candidates' vacancy.id %}">
+            {% csrf_token %}
+            <input type="hidden" name="reanalyze" value="true">
+            <button type="submit" 
+                    class="btn btn-warning"
+                    onclick="return confirm('Вы уверены, что хотите выполнить повторный анализ всех кандидатов? Это может занять некоторое время.')">
+                <i class="fas fa-sync-alt me-2"></i>Обновить анализ всех кандидатов
+            </button>
+        </form>
     </div>
+
+    {% if messages %}
+        <div class="messages mb-4">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        </div>
     {% endif %}
 
     {% if request.user.is_superuser %}
-    <div class="debug-info mb-4">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">Debug Information</h5>
-            </div>
-            <div class="card-body">
-                <p>Total Candidates: {{ all_candidates|length }}</p>
-                <p>Total Analyses: {{ analyses|length }}</p>
-                <p>Vacancy ID: {{ vacancy.id }}</p>
+        <div class="debug-info mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Debug Information</h5>
+                </div>
+                <div class="card-body">
+                    <p>Total Candidates: {{ all_candidates|length }}</p>
+                    <p>Total Analyses: {{ analyses|length }}</p>
+                    <p>Vacancy ID: {{ vacancy.id }}</p>
+                </div>
             </div>
         </div>
-    </div>
     {% endif %}
     
     <div class="row">
@@ -50,9 +62,17 @@
                                     <small class="text-muted">{{ analysis.candidate.specialization }}</small>
                                 {% endif %}
                             </div>
-                            <span class="badge {% if analysis.match_score >= 75 %}bg-success{% elif analysis.match_score >= 50 %}bg-warning{% else %}bg-danger{% endif %}">
-                                {{ analysis.match_score }}%
-                            </span>
+                            <div class="d-flex align-items-center">
+                                <a href="{% url 'analyze_candidates:reanalyze_candidate' vacancy.id analysis.candidate.id %}" 
+                                   class="btn btn-warning btn-sm me-2"
+                                   title="Обновить анализ кандидата"
+                                   onclick="return confirm('Вы уверены, что хотите выполнить повторный анализ этого кандидата?')">
+                                    <i class="fas fa-sync-alt me-1"></i>Обновить
+                                </a>
+                                <span class="badge {% if analysis.match_score >= 75 %}bg-success{% elif analysis.match_score >= 50 %}bg-warning{% else %}bg-danger{% endif %}">
+                                    {{ analysis.match_score }}%
+                                </span>
+                            </div>
                         </div>
                     </div>
                     
@@ -72,14 +92,36 @@
 
                         <div class="reputation mb-3">
                             <label class="form-label">Репутационный рейтинг:</label>
-                            <div class="h5">{{ analysis.reputation_score }}/100</div>
+                            <div class="h5">{{ analysis.reputation_score }}/1000</div>
                         </div>
 
-                        {% if analysis.feedback %}
-                        <div class="feedback mt-3">
-                            <h6 class="border-bottom pb-2">Комментарий ИИ:</h6>
-                            <p>{{ analysis.feedback }}</p>
+                        {% if analysis.top_strength_1 or analysis.top_strength_2 or analysis.top_strength_3 %}
+                        <div class="top-strengths mb-3">
+                            <h6 class="border-bottom pb-2">Сильные стороны:</h6>
+                            <ul class="list-unstyled">
+                                {% if analysis.top_strength_1 %}<li>1. {{ analysis.top_strength_1 }}</li>{% endif %}
+                                {% if analysis.top_strength_2 %}<li>2. {{ analysis.top_strength_2 }}</li>{% endif %}
+                                {% if analysis.top_strength_3 %}<li>3. {{ analysis.top_strength_3 }}</li>{% endif %}
+                            </ul>
                         </div>
+                        {% endif %}
+
+                        {% if analysis.feedback %}
+                            <div class="feedback mt-3">
+                                <h6 class="border-bottom pb-2">Комментарий ИИ:</h6>
+                                <p class="text-muted">{{ analysis.feedback|linebreaks }}</p>
+                            </div>
+                            {% if request.user.is_superuser %}
+                                <div class="debug-feedback">
+                                    <small class="text-muted">Debug: Feedback length: {{ analysis.feedback|length }}</small>
+                                </div>
+                            {% endif %}
+                        {% else %}
+                            {% if request.user.is_superuser %}
+                                <div class="alert alert-warning">
+                                    Debug: No feedback available for this analysis
+                                </div>
+                            {% endif %}
                         {% endif %}
 
                         <div class="mt-3 text-end">
@@ -109,7 +151,6 @@
 </div>
 
 <style>
-/* Оставляем оригинальные стили */
 .card {
     transition: transform 0.2s;
     border: none;
@@ -164,7 +205,6 @@
     line-height: 1.5;
 }
 
-/* Добавляем стили для отладочной информации */
 .debug-info {
     font-family: monospace;
     font-size: 0.9rem;
