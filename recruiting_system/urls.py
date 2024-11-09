@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 from . import views
 
 app_name = 'recruiting_system'
@@ -14,4 +14,5 @@ urlpatterns = [
     path('application/<int:pk>/update-status/', views.update_application_status, name='update_application_status'),
     path('candidates/', views.candidate_list, name='candidate_list'),
     path('candidates/<int:pk>/', views.candidate_detail, name='candidate_detail'),
+    path('convertor/', include('convertor_to_json.urls', namespace='convertor_to_json')),
 ] 

@@ -1,0 +1,26 @@
+{% extends 'auth_freedom/base.html' %}
+
+{% block title %}Загрузка резюме{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Массовая загрузка резюме</h2>
+    
+    <div class="card">
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="resume_files" class="form-label">Выберите файлы резюме</label>
+                    <input type="file" class="form-control" id="resume_files" name="resume_files" 
+                           multiple accept=".pdf,.doc,.docx,.pptx,.txt">
+                    <div class="form-text">
+                        Поддерживаемые форматы: PDF, DOC, DOCX, PPTX, TXT
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Загрузить</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %} 
