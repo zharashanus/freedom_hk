@@ -27,7 +27,11 @@ class RecruiterProfile(models.Model):
         ('other', 'Другой'),
     ]
 
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='recruiter_profile')
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='recruiterprofile'
+    )
     first_name = models.CharField(max_length=100, verbose_name="Имя", blank=True, default='')
     last_name = models.CharField(max_length=100, verbose_name="Фамилия", blank=True, default='')
     gender = models.CharField(max_length=10, choices=GENDER_CHOICES, verbose_name="Пол", default='other')
@@ -73,7 +77,7 @@ class CandidateProfile(models.Model):
         ('remote_only', 'Только удаленная работа'),
     ]
 
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='candidate_profile')
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='candidateprofile')
     first_name = models.CharField(max_length=100, verbose_name="Имя", blank=True, default='')
     last_name = models.CharField(max_length=100, verbose_name="Фамилия", blank=True, default='')
     gender = models.CharField(max_length=10, choices=GENDER_CHOICES, verbose_name="Пол", default='other')
@@ -113,29 +117,13 @@ class CandidateProfile(models.Model):
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
-    if created:
+    if created and not CandidateProfile.objects.filter(user=instance).exists():
         if instance.user_type == 'candidate':
             CandidateProfile.objects.create(
                 user=instance,
                 first_name=instance.first_name,
                 last_name=instance.last_name,
-                email=instance.email,
-                experience=0,
-                specialization='',
-                tech_stack=[],
-                level='no_experience',
-                education={},
-                certifications=[],
-                languages=['Русский'],
-                desired_salary=0,
-                hard_skills=[],
-                soft_skills=[],
-                gender='other',
-                birth_date='2000-01-01',
-                search_status='active',
-                country='',
-                region='',
-                relocation_status='not_ready'
+                email=instance.email
             )
         elif instance.user_type in ['recruiter', 'admin'] or instance.is_superuser:
             RecruiterProfile.objects.create(
@@ -153,8 +141,6 @@ def create_user_profile(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
-    if instance.user_type == 'recruiter' and hasattr(instance, 'recruiter_profile'):
-        instance.recruiter_profile.save()
-    elif instance.user_type == 'candidate' and hasattr(instance, 'candidate_profile'):
-        instance.candidate_profile.save()
+    if instance.user_type == 'candidate' and hasattr(instance, 'candidateprofile'):
+        instance.candidateprofile.save()
 

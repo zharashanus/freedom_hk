@@ -1,26 +1,221 @@
 {% extends 'auth_freedom/base.html' %}
+{% load static %}
 
 {% block title %}Вход{% endblock %}
 
+{% block extra_css %}
+<style>
+    .login-container {
+        display: flex;
+        min-height: calc(100vh - 76px); /* Вычитаем высоту навбара */
+    }
+
+    .left-side {
+    background-color: #4FB84F;
+    color: white;
+    width: 150%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 40px 20px;
+    margin-left: -500px;
+}
+
+    .left-side h1 {
+        
+        margin-left: 170px;
+        font-weight: 700;
+        font-size: 45px;
+        line-height: 1.4;
+        text-align: left;
+        max-width: 40%;
+        margin-bottom: 20px;
+    }
+
+    .right-side {
+        width: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+    }
+
+    .form-container {
+        width: 80%;
+        max-width: 400px;
+    }
+
+    .form-container h2 {
+        margin-bottom: 10px;
+        color: #333;
+        text-align: center;
+    }
+
+    .form-container p {
+        font-size: 14px;
+        color: #666;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .form-container input {
+        width: 100%;
+        padding: 12px;
+        margin-bottom: 15px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 14px;
+    }
+
+    .form-container .btn-primary {
+        width: 100%;
+        padding: 12px;
+        background-color: #4FB84F;
+        border: none;
+        border-radius: 16px;
+        font-size: 16px;
+        margin-bottom: 10px;
+    }
+
+    .form-container .btn-outline-success {
+        width: 100%;
+        background: transparent;
+        border: 1px solid #4FB84F;
+        color: #4FB84F;
+        border-radius: 16px;
+        font-size: 14px;
+    }
+
+    .forgot-password {
+        text-align: right;
+        margin-bottom: 15px;
+    }
+
+    .forgot-password a {
+        color: #666;
+        text-decoration: none;
+        font-size: 14px;
+    }
+
+    .illustration img {
+        max-width: 500px;
+        height: auto;
+        margin-top: 30px;
+    }
+
+    @media (max-width: 768px) {
+        .login-container {
+            flex-direction: column;
+        }
+        .left-side, .right-side {
+            width: 100%;
+        }
+        .illustration img {
+            max-width: 100%;
+        }
+    }
+
+    /* Переопределение .mt-4 для контейнера на странице входа */
+    body > .container.mt-4 {
+        margin-top: 0 !important;
+    }
+
+    /* Добавьте эти стили в существующий блок <style> */
+    .alert {
+        position: absolute;
+        padding: 1rem 1rem;
+        margin-bottom: 1rem;
+        border: 1px solid transparent;
+        border-radius: 0.25rem;
+        margin-left: 886px;
+        margin-top: 200px;
+        color: red;
+    }
+
+    .password-field {
+        position: relative;
+        width: 100%;
+    }
+
+    .password-toggle {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        width: 20px;
+        height: 20px;
+        background: none;
+        border: none;
+        padding: 0;
+    }
+
+    .password-toggle img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        margin-top: -15px;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6">
-        <h2>Вход</h2>
-        <form method="post">
-            {% csrf_token %}
-            {% for field in form %}
+<div class="login-container">
+    <div class="left-side">
+        <h1>Идеальная работа начинается с точного подбора</h1>
+        <div class="illustration">
+            <img src="{% static 'pics/pic.png' %}" alt="Illustration">
+        </div>
+    </div>
+    <div class="right-side">
+        <div class="form-container">
+            <h2>Вход</h2>
+            <p>Напишите ваш логин и пароль</p>
+            <form method="post">
+                {% csrf_token %}
                 <div class="mb-3">
-                    {{ field.label_tag }}
-                    {{ field }}
-                    {% if field.errors %}
+                    {{ form.username }}
+                    {% if form.username.errors %}
                         <div class="alert alert-danger">
-                            {{ field.errors }}
+                            {{ form.username.errors }}
                         </div>
                     {% endif %}
                 </div>
-            {% endfor %}
-            <button type="submit" class="btn btn-primary">Войти</button>
-        </form>
+                <div class="mb-3">
+                    <div class="password-field">
+                        {{ form.password }}
+                        <button type="button" class="password-toggle" onclick="togglePassword(this)">
+                            <img src="{% static 'pics/close_eye.png' %}" alt="toggle password">
+                        </button>
+                    </div>
+                    {% if form.password.errors %}
+                        <div class="alert alert-danger">
+                            {{ form.password.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="forgot-password">
+                    <a href="#">Забыли пароль?</a>
+                </div>
+                <button type="submit" class="btn btn-primary">Войти</button>
+                <a href="{% url 'auth_freedom:register' %}" class="btn btn-outline-success">Зарегистрироваться</a>
+            </form>
+        </div>
     </div>
 </div>
+<script>
+function togglePassword(button) {
+    const passwordInput = button.parentElement.querySelector('input');
+    const img = button.querySelector('img');
+    
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        img.src = "{% static 'pics/open_eye.png' %}";
+    } else {
+        passwordInput.type = 'password';
+        img.src = "{% static 'pics/close_eye.png' %}";
+    }
+}
+</script>
 {% endblock %} 

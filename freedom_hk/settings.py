@@ -206,6 +206,11 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': True,
         },
+        'auth_freedom': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
     },
 }
 

@@ -1,0 +1,72 @@
+{% extends 'auth_freedom/base.html' %}
+{% load static %}
+
+{% block title %}Регистрация - Шаг 1{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'css/register.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <div class="left-side">
+        <h1>Идеальная работа начинается с точного подбора</h1>
+        <div class="illustration">
+            <img src="{% static 'pics/pic.png' %}" alt="Illustration">
+        </div>
+    </div>
+    <div class="right-side">
+        <div class="form-container">
+            <div class="progress-bar">
+                <div>1</div>
+                <div class="line"></div>
+                <div style="opacity: 0.5;">2</div>
+                <div class="line" style="opacity: 0.5;"></div>
+                <div style="opacity: 0.5;">3</div>
+            </div>
+            <h2>Регистрация</h2>
+            <p style="font-size: 14px; color: #666;">Зарегистрируйтесь через e-mail</p>
+            <form method="post">
+                {% csrf_token %}
+                {% for field in form %}
+                    <div class="mb-3">
+                        {% if 'password' in field.name %}
+                            <div class="password-field">
+                                {{ field }}
+                                <a href="javascript:void(0)" class="password-toggle" onclick="togglePassword(this)">
+                                    <img src="{% static 'pics/close_eye.png' %}" alt="toggle password">
+                                </a>
+                            </div>
+                        {% else %}
+                            {{ field }}
+                        {% endif %}
+                        {% if field.errors %}
+                            <div class="alert alert-danger">
+                                {{ field.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+                <button type="submit">Далее</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function togglePassword(button) {
+    const passwordInput = button.parentElement.querySelector('input');
+    const img = button.querySelector('img');
+    
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        img.src = "{% static 'pics/open_eye.png' %}";
+    } else {
+        passwordInput.type = 'password';
+        img.src = "{% static 'pics/close_eye.png' %}";
+    }
+}
+</script>
+{% endblock %} 

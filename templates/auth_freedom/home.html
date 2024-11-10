@@ -8,6 +8,7 @@
     <div class="container">
         <div class="row align-items-center">
             <div class="col-md-6">
+                <img class="imgforwhom" src="{% static 'pics/forwhom.png' %}" >
                 <h1 class="display-4 mb-3">Идеальная работа начинается с точного подбора</h1>
                 <p class="lead mb-4">В приложении также доступны советы по подготовке к собеседованиям и рекомендации по улучшению профессиональных навыков.</p>
                 {% if not user.is_authenticated %}
@@ -26,6 +27,7 @@
 {% endblock %}
 
 {% block content %}
+<!-- How it Works Section -->
 <section class="section text-center py-5">
     <h2 class="section-title" style="color: #4FB84F;">Как работает наша система?</h2>
     <div class="row g-4 justify-content-center">
@@ -47,6 +49,88 @@
                 </div>
             </div>
         </div>
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <img src="{% static 'pics/work_icon.png' %}" alt="Work" class="mb-3" style="width: 80px;">
+                    <h3 class="h5">Работаем</h3>
+                    <p>После завершения этапов подбора, процесс найма становится проще и эффективнее.</p>
+                </div>
+            </div>
+        </div>
     </div>
 </section>
+
+<!-- AI Usage Section -->
+<section class="section ai-usage py-5">
+    <h2 class="section-title" style="color: #4FB84F;">Как мы используем ИИ?</h2>
+    <div class="row align-items-center">
+        <div class="col-md-6 text-center">
+            <img src="{% static 'pics/main3_icon.png' %}" alt="AI Usage" class="img-fluid">
+        </div>
+        <div class="col-md-6">
+            <h3>Загрузка файла кандидатом</h3>
+            <hr class="w-25" style="border-color: #4FB84F;">
+            <p>На первом этапе пользователь загружает резюме и дополнительное видео-резюме. Видео-резюме представляет собой короткое видео, где кандидат рассказывает о себе, своем опыте и навыках.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Analysis Section -->
+<section class="section analysis py-5">
+    <div class="row align-items-center">
+        <div class="col-md-6">
+            <h3>Анализ резюме и видео с помощью ИИ</h3>
+            <hr class="w-25" style="border-color: #4FB84F;">
+            <p>Анализ поведения на видео: Искусственный интеллект отслеживает движения и выражения лица кандидата, чтобы определить уверенность, открытость и эмоциональное состояние.</p>
+            <p>ИИ также анализирует публичные профили кандидата в социальных сетях (при согласии пользователя) и оценивает его интересы, навыки и профессиональные качества.</p>
+        </div>
+        <div class="col-md-6 text-center">
+            <img src="{% static 'pics/analys_pic.png' %}" alt="AI Analysis" class="img-fluid">
+        </div>
+    </div>
+</section>
+
+<!-- Results Section -->
+<section class="section results py-5">
+    <div class="row align-items-center">
+        <div class="col-md-6 text-center">
+            <img src="{% static 'pics/result_pic.png' %}" alt="Results" class="img-fluid">
+        </div>
+        <div class="col-md-6">
+            <h3>Результаты анализа</h3>
+            <hr class="w-25" style="border-color: #4FB84F;">
+            <p>Диаграммы поведения: Интерактивные графики и диаграммы показывают такие характеристики, как уверенность, профессионализм, коммуникативные навыки и открытость.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Statistics Section -->
+<section class="section statistics text-center py-5">
+    <h2 class="section-title" style="color: #4FB84F;">Статистика системы</h2>
+    <p class="statistics-subtitle">Более 5,000 активных вакансий и 50,000 кандидатов готовы к работе</p>
+    <div class="statistics-image mt-4">
+        <img src="{% static 'pics/stats.png' %}" alt="Statistics" class="img-fluid">
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer mt-5 py-5" style="background-color: #4FB84F;color: white;width: 100%;position: absolute;left: 0;">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 text-center text-md-start">
+                <h5>Наши контакты</h5>
+                <p class="mb-1">+7 (777) 777 77 77</p>
+                <p class="mb-1">+7 (777) 777 77 77</p>
+                <p class="mb-1">+7 (777) 777 77 77</p>
+                <p class="mb-1">+7 (777) 777 77 77</p>
+            </div>
+            <div class="col-md-6 text-center text-md-end">
+                <div class="social-links">
+                    <a href="#" class="text-white text-decoration-none">inst @team</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
 {% endblock %} 
