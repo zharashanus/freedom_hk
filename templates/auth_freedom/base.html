@@ -20,7 +20,7 @@
             </a>
             <div class="navbar-nav">
                 {% if user.is_authenticated %}
-                    <a class="nav-link text-white" href="{% url 'auth_freedom:profile' %}">
+                    <a class="nav-link text-white" href="{% if user.user_type == 'candidate' %}{% url 'auth_freedom:candidate_profile' %}{% else %}{% url 'auth_freedom:recruiter_profile' %}{% endif %}">
                         {% if user.user_type == 'candidate' %}
                             Профиль кандидата
                         {% else %}

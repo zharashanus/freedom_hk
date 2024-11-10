@@ -86,6 +86,10 @@
                 <img src="{% static 'pics/recruiter_profile/profile.png' %}" alt="Profile" />
                 <span>Редактировать аккаунт</span>
             </a>
+            <a href="{% url 'recruiting_system:candidate_applications' %}" class="menu-item {% if request.resolver_match.url_name == 'candidate_applications' %}active{% endif %}">
+                <img src="{% static 'pics/recruiter_profile/add.png' %}" alt="Applications" />
+                <span>Мои отклики</span>
+            </a>
         </nav>
     </div>
     <div class="main-content">

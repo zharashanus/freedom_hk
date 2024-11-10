@@ -19,4 +19,5 @@ urlpatterns = [
     path('activity-feed/', views.activity_feed, name='activity_feed'),
     path('candidate-responses/', views.candidate_responses, name='candidate_responses'),
     path('candidate-vacancies/', views.candidate_vacancy_list, name='candidate_vacancy_list'),
+    path('candidate/applications/', views.CandidateApplicationListView.as_view(), name='candidate_applications'),
 ] 

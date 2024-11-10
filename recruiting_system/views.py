@@ -1,6 +1,8 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.views.generic import ListView
+from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import Vacancy, Application, CandidateProfile
 from .forms import VacancyForm, ApplicationForm
 
@@ -265,3 +267,18 @@ def candidate_vacancy_list(request):
         'specializations': specializations,
         'levels': levels,
     })
+
+class CandidateApplicationListView(LoginRequiredMixin, ListView):
+    model = Application
+    template_name = 'recruiting_system/candidate_applications.html'
+    context_object_name = 'applications'
+
+    def get_queryset(self):
+        return Application.objects.filter(candidate__user=self.request.user).order_by('-created_at')
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated or request.user.user_type != 'candidate':
+            return self.handle_no_permission()
+        return super().dispatch(request, *args, **kwargs)
+
+

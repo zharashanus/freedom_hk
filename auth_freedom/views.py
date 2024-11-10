@@ -24,6 +24,10 @@ from django.views import View
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.db import transaction
+from datetime import datetime
+from django.conf import settings
+import openai
+from openai import OpenAI
 
 logger = logging.getLogger(__name__)
 
@@ -96,7 +100,7 @@ def edit_candidate_profile(request):
         profile = request.user.candidateprofile
     except CandidateProfile.DoesNotExist:
         messages.error(request, 'Профиль не найден')
-        return redirect('auth_freedom:profile')
+        return redirect('auth_freedom:candidate_profile')
 
     if request.method == 'POST':
         form = CandidateProfileEditForm(request.POST, instance=profile)
@@ -116,7 +120,7 @@ def edit_candidate_profile(request):
                 
                 profile.save()
                 messages.success(request, 'Профиль успешно обновлен')
-                return redirect('auth_freedom:profile')
+                return redirect('auth_freedom:candidate_profile')
             except Exception as e:
                 logger.error(f"Error saving profile: {str(e)}")
                 messages.error(request, f'Ошибка при сохранении: {str(e)}')
@@ -151,7 +155,7 @@ def edit_profile(request):
             profile.work_experience = work_experience
             profile.save()
             messages.success(request, 'Профиль успешно обновлен')
-            return redirect('auth_freedom:profile')
+            return redirect('auth_freedom:candidate_profile')
     else:
         form = CandidateProfileEditForm(instance=request.user.candidate_profile)
     
@@ -160,80 +164,80 @@ def edit_profile(request):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def bulk_register_candidates(request):
-    # Disconnect signals temporarily
+    logger.info("Starting bulk registration process")
     post_save.disconnect(create_user_profile, sender=get_user_model())
     post_save.disconnect(save_user_profile, sender=get_user_model())
 
     try:
         if not isinstance(request.data, list):
+            logger.error("Invalid data format: expected list, got %s", type(request.data))
             return Response({'error': 'Expected a list of candidates'}, 
                           status=status.HTTP_400_BAD_REQUEST)
 
         results = []
-        for candidate_data in request.data:
+        for index, candidate_data in enumerate(request.data):
+            logger.debug("Processing candidate %d: %s", index, candidate_data.get('username', 'Unknown'))
+            
             serializer = BulkCandidateRegistrationSerializer(data=candidate_data)
             if serializer.is_valid():
                 try:
+                    # Validate birth_date before profile creation
+                    if 'birth_date' in serializer.validated_data:
+                        birth_date = serializer.validated_data['birth_date']
+                        if isinstance(birth_date, str):
+                            logger.debug("Attempting to parse birth_date: %s", birth_date)
+                            parsed_date = parse_date_with_gpt(birth_date)
+                            if parsed_date:
+                                serializer.validated_data['birth_date'] = parsed_date
+                            else:
+                                logger.warning("Could not parse birth_date, setting to None: %s", birth_date)
+                                serializer.validated_data['birth_date'] = None
+
                     # Create User
                     user = get_user_model().objects.create_user(
                         username=serializer.validated_data['username'],
                         password=serializer.validated_data['password'],
                         user_type='candidate'
                     )
+                    logger.debug("Created user: %s", user.username)
 
-                    # Create education data
-                    education_data = {
-                        'institution': serializer.validated_data['education_institution'],
-                        'faculty': serializer.validated_data['education_faculty'],
-                        'degree': serializer.validated_data['education_degree'],
-                        'graduation_year': serializer.validated_data['graduation_year']
-                    }
-
-                    # Create CandidateProfile
+                    # Create profile
                     profile = CandidateProfile.objects.create(
                         user=user,
-                        first_name=serializer.validated_data['first_name'],
-                        last_name=serializer.validated_data['last_name'],
-                        email=serializer.validated_data['email'],
-                        phone=serializer.validated_data['phone'],
-                        birth_date=serializer.validated_data['birth_date'],
-                        gender=serializer.validated_data['gender'],
-                        about_me=serializer.validated_data['about_me'],
-                        specialization=serializer.validated_data['specialization'],
-                        experience=serializer.validated_data['experience'],
-                        country=serializer.validated_data['country'],
-                        region=serializer.validated_data['region'],
-                        languages=serializer.validated_data['languages'],
-                        desired_salary=serializer.validated_data['desired_salary'],
-                        search_status=serializer.validated_data['search_status'],
-                        relocation_status=serializer.validated_data['relocation_status'],
-                        level=serializer.validated_data['level'],
-                        hard_skills=serializer.validated_data['hard_skills'],
-                        soft_skills=serializer.validated_data['soft_skills'],
-                        education=education_data
+                        **{k: v for k, v in serializer.validated_data.items() 
+                           if k not in ['username', 'password']}
                     )
-                    
+                    logger.debug("Created profile for user: %s", user.username)
+
                     results.append({
                         'username': user.username,
                         'status': 'success',
                         'message': 'Successfully registered'
                     })
                 except Exception as e:
+                    logger.error("Error creating candidate %s: %s", 
+                               serializer.validated_data.get('username'), str(e),
+                               exc_info=True)
                     results.append({
-                        'username': serializer.validated_data['username'],
+                        'username': serializer.validated_data.get('username'),
                         'status': 'error',
                         'message': str(e)
                     })
             else:
+                logger.error("Validation failed for candidate: %s. Errors: %s",
+                           candidate_data.get('username'), serializer.errors)
                 results.append({
                     'username': candidate_data.get('username', 'Unknown'),
                     'status': 'error',
                     'message': serializer.errors
                 })
 
+        logger.info("Bulk registration completed. Processed %d candidates", len(request.data))
         return Response(results, status=status.HTTP_200_OK)
+    except Exception as e:
+        logger.error("Unexpected error in bulk registration: %s", str(e), exc_info=True)
+        raise
     finally:
-        # Reconnect signals
         post_save.connect(create_user_profile, sender=get_user_model())
         post_save.connect(save_user_profile, sender=get_user_model())
 
@@ -402,3 +406,140 @@ def register_step1(request):
     else:
         form = RegistrationStep1Form()
     return render(request, 'auth_freedom/register_step1.html', {'form': form})
+
+def parse_date_with_gpt(date_string):
+    logger.debug("Attempting to parse date: %s", date_string)
+    
+    if not date_string or date_string.strip() == '':
+        logger.info("Empty date string received, returning None")
+        return None
+
+    try:
+        client = OpenAI(api_key=settings.OPENAI_API_KEY)
+        
+        # Улучшенный промпт для более точного парсинга дат
+        prompt = f"""
+        Analyze and convert this date string: "{date_string}" to YYYY-MM-DD format.
+        Rules:
+        1. If it's a Russian date format (e.g., "01 января 2023", "1 янв 2023"), convert it
+        2. If it's a numeric format (e.g., "01.01.2023", "01/01/2023"), convert it
+        3. If it contains only month and year (e.g., "январь 2023", "01.2023"), use the first day of the month
+        4. If it's a relative date (e.g., "2 года назад"), calculate the actual date
+        5. Return only the date in YYYY-MM-DD format or 'INVALID' if cannot parse
+        """
+
+        completion = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {
+                    "role": "system", 
+                    "content": """You are a date parsing expert. 
+                    You understand Russian and English date formats.
+                    Only respond with a date in YYYY-MM-DD format or 'INVALID'.
+                    No explanations or additional text."""
+                },
+                {
+                    "role": "user", 
+                    "content": prompt
+                }
+            ],
+            temperature=0,
+            max_tokens=20
+        )
+
+        parsed_date_str = completion.choices[0].message.content.strip()
+        logger.debug("GPT returned date string: %s", parsed_date_str)
+
+        if parsed_date_str == 'INVALID':
+            logger.warning("GPT marked date as invalid: %s", date_string)
+            return None
+
+        try:
+            parsed_date = datetime.strptime(parsed_date_str, '%Y-%m-%d').date()
+            logger.info("Successfully parsed date %s to %s", date_string, parsed_date)
+            return parsed_date
+        except ValueError as e:
+            logger.error("Failed to parse GPT response: %s. Error: %s", parsed_date_str, str(e))
+            return None
+
+    except Exception as e:
+        logger.error("Error in GPT date parsing: %s", str(e), exc_info=True)
+        return None
+
+def extract_resume_data_with_gpt(resume_text):
+    """
+    Извлекает данные из текста резюме с помощью GPT
+    """
+    logger.debug("Starting resume extraction with GPT")
+    try:
+        client = OpenAI(api_key=settings.OPENAI_API_KEY)
+        
+        prompt = f"""
+        Analyze this resume text and extract structured information in the following JSON format:
+        {{
+            "personal_info": {{
+                "first_name": "",
+                "last_name": "",
+                "email": "",
+                "phone": "",
+                "birth_date": "YYYY-MM-DD",
+                "gender": "",
+                "location": "",
+                "about": ""
+            }},
+            "education": [
+                {{
+                    "institution": "",
+                    "degree": "",
+                    "field": "",
+                    "start_date": "YYYY-MM-DD",
+                    "end_date": "YYYY-MM-DD"
+                }}
+            ],
+            "experience": [
+                {{
+                    "company": "",
+                    "position": "",
+                    "start_date": "YYYY-MM-DD",
+                    "end_date": "YYYY-MM-DD",
+                    "responsibilities": []
+                }}
+            ],
+            "skills": [],
+            "languages": []
+        }}
+
+        Resume text:
+        {resume_text}
+        """
+
+        completion = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {
+                    "role": "system", 
+                    "content": """You are a resume parsing expert.
+                    Extract information accurately and return only valid JSON.
+                    Use 'null' for missing values.
+                    Convert all dates to YYYY-MM-DD format."""
+                },
+                {
+                    "role": "user", 
+                    "content": prompt
+                }
+            ],
+            temperature=0,
+            max_tokens=2000
+        )
+
+        parsed_data = json.loads(completion.choices[0].message.content)
+        logger.info("Successfully extracted resume data")
+        return parsed_data
+
+    except json.JSONDecodeError as e:
+        logger.error("Failed to parse GPT JSON response: %s", str(e))
+        return None
+    except Exception as e:
+        logger.error("Error in resume extraction: %s", str(e), exc_info=True)
+        return None
+
