@@ -81,11 +81,10 @@ class Vacancy(models.Model):
 
 class Application(models.Model):
     STATUS_CHOICES = [
-        ('new', 'Новая'),
-        ('reviewing', 'На рассмотрении'),
-        ('interview', 'Назначено интервью'),
-        ('accepted', 'Принята'),
-        ('rejected', 'Отклонена'),
+        ('pending', 'На рассмотрении'),
+        ('accepted', 'Принято'),
+        ('rejected', 'Отклонено'),
+        ('interview', 'Назначено собеседование'),
     ]
 
     SOURCE_CHOICES = [
@@ -96,9 +95,9 @@ class Application(models.Model):
     ]
 
     vacancy = models.ForeignKey(Vacancy, on_delete=models.CASCADE, related_name='applications')
-    candidate = models.ForeignKey(CandidateProfile, on_delete=models.CASCADE, related_name='applications')
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='new')
-    cover_letter = models.TextField(verbose_name="Сопроводительное письмо", blank=True)
+    candidate = models.ForeignKey('auth_freedom.CandidateProfile', on_delete=models.CASCADE, related_name='applications')
+    cover_letter = models.TextField(blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     match_score = models.DecimalField(
@@ -148,3 +147,5 @@ class Application(models.Model):
     class Meta:
         verbose_name = "Заявка"
         verbose_name_plural = "Заявки"
+        unique_together = ['vacancy', 'candidate']
+        ordering = ['-created_at']

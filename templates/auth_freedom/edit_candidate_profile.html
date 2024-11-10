@@ -1,112 +1,176 @@
-{% extends 'auth_freedom/base.html' %}
+{% extends 'auth_freedom/base_candidate.html' %}
 
 {% load static %}
 
 {% block title %}Редактирование профиля{% endblock %}
 
+{% block extra_css %}
+<style>
+    .profile-edit-container {
+        background: white;
+        border-radius: 8px;
+        padding: 30px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        margin: 20px;
+    }
+
+    .section-title {
+        font-size: 1.8rem;
+        color: #333;
+        margin-bottom: 30px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #4FB84F;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-label {
+        font-weight: 500;
+        color: #333;
+        margin-bottom: 8px;
+    }
+
+    .form-control {
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 8px 12px;
+    }
+
+    .work-experience-section {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        margin-top: 30px;
+    }
+
+    .work-experience-item {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 15px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .btn-success {
+        background: #4FB84F;
+        border: none;
+    }
+
+    .btn-success:hover {
+        background: #45a045;
+    }
+
+    .btn-primary {
+        background: #4FB84F;
+        border: none;
+        padding: 10px 20px;
+    }
+
+    .btn-secondary {
+        background: #6c757d;
+        border: none;
+        padding: 10px 20px;
+    }
+
+    .btn-danger {
+        background: #dc3545;
+        border: none;
+    }
+
+    .alert {
+        border-radius: 4px;
+        margin-bottom: 15px;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container mt-4">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="text-center">Редактирование профиля</h2>
-                </div>
-                <div class="card-body">
-                    {% if messages %}
-                        {% for message in messages %}
-                            <div class="alert alert-{{ message.tags }}">
-                                {{ message }}
-                            </div>
-                        {% endfor %}
-                    {% endif %}
-                    
-                    <form method="post">
-                        {% csrf_token %}
-                        
-                        <!-- Основные поля формы -->
-                        {% for field in form %}
-                            {% if not 'work_experience_' in field.name %}
-                                <div class="mb-3">
-                                    <label for="{{ field.id_for_label }}" class="form-label">
-                                        {{ field.label }}{% if field.field.required %} *{% endif %}
-                                    </label>
-                                    {{ field }}
-                                    {% if field.errors %}
-                                        <div class="alert alert-danger mt-1">
-                                            {{ field.errors }}
-                                        </div>
-                                    {% endif %}
-                                </div>
-                            {% endif %}
-                        {% endfor %}
-
-                        <!-- Секция опыта работы -->
-                        <div class="card mt-4">
-                            <div class="card-header">
-                                <h5>Опыт работы</h5>
-                            </div>
-                            <div class="card-body">
-                                <div id="work-experience-container">
-                                    <!-- Существующий опыт работы будет добавлен здесь через JavaScript -->
-                                </div>
-                                <button type="button" class="btn btn-success mt-3" id="add-work-experience">
-                                    Добавить место работы
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="text-center mt-4">
-                            <button type="submit" class="btn btn-primary">Сохранить изменения</button>
-                            <a href="{% url 'auth_freedom:profile' %}" class="btn btn-secondary">Отмена</a>
-                        </div>
-                    </form>
-                </div>
+<div class="profile-edit-container">
+    <h2 class="section-title">Редактирование профиля</h2>
+    
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
             </div>
+        {% endfor %}
+    {% endif %}
+    
+    <form method="post">
+        {% csrf_token %}
+        
+        {% for field in form %}
+            {% if not 'work_experience_' in field.name %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}" class="form-label">
+                        {{ field.label }}{% if field.field.required %} *{% endif %}
+                    </label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <div class="alert alert-danger">
+                            {{ field.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endif %}
+        {% endfor %}
+
+        <div class="work-experience-section">
+            <h3 class="mb-4">Опыт работы</h3>
+            <div id="work-experience-container">
+                <!-- Существующий опыт работы будет добавлен через JavaScript -->
+            </div>
+            <button type="button" class="btn btn-success" id="add-work-experience">
+                <i class="fas fa-plus"></i> Добавить место работы
+            </button>
         </div>
-    </div>
+
+        <div class="text-center mt-4">
+            <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+            <a href="{% url 'auth_freedom:candidate_profile' %}" class="btn btn-secondary">Отмена</a>
+        </div>
+    </form>
 </div>
 
 <!-- Шаблон для нового места работы -->
 <template id="work-experience-template">
-    <div class="work-experience-item card mb-3">
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Название компании *</label>
-                    <input type="text" name="work_experience[idx][company]" class="form-control" required>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Должность *</label>
-                    <input type="text" name="work_experience[idx][position]" class="form-control" required>
-                </div>
+    <div class="work-experience-item">
+        <div class="row">
+            <div class="col-md-6 form-group">
+                <label class="form-label">Название компании *</label>
+                <input type="text" name="work_experience[idx][company]" class="form-control" required>
             </div>
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Дата начала *</label>
-                    <input type="date" name="work_experience[idx][start_date]" class="form-control" required>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Дата окончания</label>
-                    <input type="date" name="work_experience[idx][end_date]" class="form-control">
-                </div>
+            <div class="col-md-6 form-group">
+                <label class="form-label">Должность *</label>
+                <input type="text" name="work_experience[idx][position]" class="form-control" required>
             </div>
-            <div class="mb-3">
-                <label class="form-label">Описание обязанностей *</label>
-                <textarea name="work_experience[idx][description]" class="form-control" rows="3" required></textarea>
-            </div>
-            <button type="button" class="btn btn-danger remove-work-experience">Удалить</button>
         </div>
+        <div class="row">
+            <div class="col-md-6 form-group">
+                <label class="form-label">Дата начала *</label>
+                <input type="date" name="work_experience[idx][start_date]" class="form-control" required>
+            </div>
+            <div class="col-md-6 form-group">
+                <label class="form-label">Дата окончания</label>
+                <input type="date" name="work_experience[idx][end_date]" class="form-control">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Описание обязанностей *</label>
+            <textarea name="work_experience[idx][description]" class="form-control" rows="3" required></textarea>
+        </div>
+        <button type="button" class="btn btn-danger remove-work-experience">
+            <i class="fas fa-trash"></i> Удалить
+        </button>
     </div>
 </template>
-
 {% endblock %}
 
 {% block extra_js %}
 <script src="{% static 'js/work_experience.js' %}"></script>
-<div id="work-experience-data" 
-     data-experience="{{ form.instance.work_experience|safe|default:'[]' }}">
-</div>
+<div id="work-experience-data" data-experience="{{ form.instance.work_experience|safe|default:'[]' }}"></div>
 <script>
     const workExperienceData = document.getElementById('work-experience-data');
     const experiences = JSON.parse(workExperienceData.dataset.experience);

@@ -120,6 +120,11 @@
         border: 1px solid #4CAF50;
         color: #4CAF50;
     }
+
+    .btn-danger {
+        background: #dc3545;
+        color: white;
+    }
 </style>
 {% endblock %}
 
@@ -158,11 +163,14 @@
         <a href="{% url 'auth_freedom:edit_profile' %}" class="btn-warning">
             Редактировать профиль
         </a>
-        <a href="{% url 'recruiting_system:vacancy_list' %}" class="btn-primary">
+        <a href="{% url 'recruiting_system:candidate_vacancy_list' %}" class="btn-primary">
             Посмотреть вакансии
         </a>
         <a href="{% url 'recruiting_system:application_list' %}" class="btn-outline-primary">
             Мои отклики
+        </a>
+        <a href="{% url 'auth_freedom:logout' %}" class="btn-danger">
+            Выйти
         </a>
     </div>
 </div>

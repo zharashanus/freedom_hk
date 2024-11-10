@@ -101,16 +101,21 @@
     <div class="button-group">
         {% if request.user.user_type == 'candidate' %}
             {% if not has_applied %}
-            <form method="post" action="{% url 'recruiting_system:apply_vacancy' vacancy.pk %}" style="width: 100%;">
-                {% csrf_token %}
-                <div class="form-group">
-                    <label for="cover_letter">Сопроводительное письмо:</label>
-                    <textarea id="cover_letter" name="cover_letter"></textarea>
-                </div>
-                <button type="submit" class="action-button apply-btn">Откликнуться</button>
-            </form>
+                <form method="post" action="{% url 'recruiting_system:apply_vacancy' vacancy.pk %}" class="application-form">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="cover_letter">Сопроводительное письмо:</label>
+                        <textarea id="cover_letter" name="cover_letter" class="form-control" required></textarea>
+                    </div>
+                    <button type="submit" class="action-button apply-btn">Откликнуться</button>
+                </form>
             {% else %}
-            <div class="alert alert-info">Вы уже откликнулись на эту вакансию</div>
+                {% with application=vacancy.applications.all|first %}
+                <div class="application-status">
+                    <p>Статус вашего отклика: <strong>{{ application.get_status_display }}</strong></p>
+                    <p>Отправлено: {{ application.created_at|date:"d.m.Y H:i" }}</p>
+                </div>
+                {% endwith %}
             {% endif %}
         {% endif %}
 

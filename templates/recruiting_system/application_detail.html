@@ -1,61 +1,167 @@
-{% extends 'auth_freedom/base.html' %}
+{% extends 'auth_freedom/base_recruiter.html' %}
+{% load static %}
 
 {% block title %}Заявка на вакансию{% endblock %}
 
+{% block extra_css %}
+<style>
+    .application-detail {
+        background: white;
+        border-radius: 8px;
+        padding: 30px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        margin: 20px;
+    }
+
+    .application-header {
+        margin-bottom: 30px;
+    }
+
+    .application-title {
+        font-size: 1.8rem;
+        color: #333;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #4FB84F;
+    }
+
+    .info-section {
+        margin-bottom: 25px;
+    }
+
+    .section-title {
+        font-size: 1.2rem;
+        color: #333;
+        margin-bottom: 15px;
+        font-weight: 500;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .info-card {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        border-left: 4px solid #4FB84F;
+    }
+
+    .info-item {
+        margin-bottom: 10px;
+        color: #666;
+    }
+
+    .info-item strong {
+        color: #333;
+        margin-right: 8px;
+    }
+
+    .text-section {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        margin-top: 5px;
+    }
+
+    .btn-primary {
+        background: #4FB84F;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .btn-primary:hover {
+        background: #45a049;
+    }
+
+    .match-score {
+        font-size: 1.2rem;
+        color: #4FB84F;
+        font-weight: bold;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container">
-    <div class="card">
-        <div class="card-body">
-            <h2 class="card-title">{{ application.vacancy.title }}</h2>
-            <div class="card-text">
-                {% if request.user.user_type == 'recruiter' %}
-                <h4>Информация о кандидате:</h4>
-                <p>
-                    <strong>ФИО:</strong> {{ application.candidate.user.get_full_name }}<br>
-                    <strong>Опыт работы:</strong> {{ application.candidate.experience }} лет<br>
-                    <strong>Специализация:</strong> {{ application.candidate.specialization }}<br>
-                    <strong>Уровень:</strong> {{ application.candidate.get_level_display }}<br>
-                    <strong>Желаемая зарплата:</strong> {{ application.desired_salary }}<br>
-                    <strong>Местоположение:</strong> {{ application.current_location.country }}, {{ application.current_location.region }}<br>
-                    <strong>Готовность к переезду:</strong> {{ application.get_relocation_status_display }}<br>
-                    <strong>Оценка соответствия:</strong> {{ application.match_score }}%
-                </p>
-                {% else %}
-                <p><strong>Рекрутер:</strong> {{ application.vacancy.recruiter.user.get_full_name }}</p>
-                {% endif %}
+<div class="application-detail">
+    <div class="application-header">
+        <h1 class="application-title">{{ application.vacancy.title }}</h1>
+    </div>
 
-                <p><strong>Статус заявки:</strong> {{ application.get_status_display }}</p>
-                <p><strong>Дата подачи:</strong> {{ application.created_at|date:"d.m.Y" }}</p>
-                <p><strong>Источник:</strong> {{ application.get_source_display }}</p>
+    <div class="info-grid">
+        {% if request.user.user_type == 'recruiter' %}
+        <div class="info-card">
+            <h2 class="section-title">Информация о кандидате</h2>
+            <div class="info-item"><strong>ФИО:</strong> {{ application.candidate.user.get_full_name }}</div>
+            <div class="info-item"><strong>Опыт работы:</strong> {{ application.candidate.experience }} лет</div>
+            <div class="info-item"><strong>Специализация:</strong> {{ application.candidate.specialization }}</div>
+            <div class="info-item"><strong>Уровень:</strong> {{ application.candidate.get_level_display }}</div>
+            <div class="info-item"><strong>Желаемая зарплата:</strong> {{ application.desired_salary }}</div>
+            <div class="info-item"><strong>Местоположение:</strong> {{ application.current_location.country }}, {{ application.current_location.region }}</div>
+            <div class="info-item"><strong>Готовность к переезду:</strong> {{ application.get_relocation_status_display }}</div>
+            <div class="info-item match-score"><strong>Оценка соответствия:</strong> {{ application.match_score }}%</div>
+        </div>
+        {% else %}
+        <div class="info-card">
+            <div class="info-item"><strong>Рекрутер:</strong> {{ application.vacancy.recruiter.user.get_full_name }}</div>
+        </div>
+        {% endif %}
 
-                <h4>Сопроводительное письмо:</h4>
-                <p>{{ application.cover_letter|linebreaks|default:"Не указано" }}</p>
-
-                {% if request.user.user_type == 'recruiter' %}
-                <h4>Заметки рекрутера:</h4>
-                <p>{{ application.notes|linebreaks|default:"Заметок нет" }}</p>
-
-                <form method="post" action="{% url 'recruiting_system:update_application_status' application.pk %}">
-                    {% csrf_token %}
-                    <div class="form-group">
-                        <label for="status">Изменить статус:</label>
-                        <select class="form-control" id="status" name="status">
-                            {% for status, label in application.STATUS_CHOICES %}
-                            <option value="{{ status }}" {% if application.status == status %}selected{% endif %}>
-                                {{ label }}
-                            </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="form-group mt-3">
-                        <label for="notes">Заметки:</label>
-                        <textarea class="form-control" id="notes" name="notes" rows="4">{{ application.notes }}</textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary mt-3">Обновить</button>
-                </form>
-                {% endif %}
-            </div>
+        <div class="info-card">
+            <h2 class="section-title">Информация о заявке</h2>
+            <div class="info-item"><strong>Статус заявки:</strong> {{ application.get_status_display }}</div>
+            <div class="info-item"><strong>Дата подачи:</strong> {{ application.created_at|date:"d.m.Y" }}</div>
+            <div class="info-item"><strong>Источник:</strong> {{ application.get_source_display }}</div>
         </div>
     </div>
+
+    <div class="text-section">
+        <h2 class="section-title">Сопроводительное письмо</h2>
+        <p>{{ application.cover_letter|linebreaks|default:"Не указано" }}</p>
+    </div>
+
+    {% if request.user.user_type == 'recruiter' %}
+    <div class="text-section">
+        <h2 class="section-title">Заметки рекрутера</h2>
+        <p>{{ application.notes|linebreaks|default:"Заметок нет" }}</p>
+
+        <form method="post" action="{% url 'recruiting_system:update_application_status' application.pk %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="status">Изменить статус:</label>
+                <select class="form-control" id="status" name="status">
+                    {% for status, label in application.STATUS_CHOICES %}
+                    <option value="{{ status }}" {% if application.status == status %}selected{% endif %}>
+                        {{ label }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="notes">Заметки:</label>
+                <textarea class="form-control" id="notes" name="notes" rows="4">{{ application.notes }}</textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Обновить</button>
+        </form>
+    </div>
+    {% endif %}
 </div>
 {% endblock %} 

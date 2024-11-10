@@ -17,14 +17,26 @@ def vacancy_list(request):
 def vacancy_detail(request, pk):
     vacancy = get_object_or_404(Vacancy, pk=pk)
     has_applied = False
+    application = None
+    
     if request.user.user_type == 'candidate':
         has_applied = Application.objects.filter(
             vacancy=vacancy,
-            candidate=request.user.candidate_profile
+            candidate=request.user.candidateprofile
         ).exists()
-    return render(request, 'recruiting_system/vacancy_detail.html', {
+        if has_applied:
+            application = Application.objects.filter(
+                vacancy=vacancy,
+                candidate=request.user.candidateprofile
+            ).first()
+        template = 'recruiting_system/candidate_vacancy_detail.html'
+    else:
+        template = 'recruiting_system/vacancy_detail.html'
+    
+    return render(request, template, {
         'vacancy': vacancy,
-        'has_applied': has_applied
+        'has_applied': has_applied,
+        'application': application
     })
 
 @login_required
@@ -53,9 +65,27 @@ def apply_vacancy(request, pk):
         return redirect('recruiting_system:vacancy_list')
     
     vacancy = get_object_or_404(Vacancy, pk=pk)
-    if Application.objects.filter(vacancy=vacancy, candidate=request.user.candidate_profile).exists():
-        messages.error(request, 'Вы уже откликнулись на эту вакансию')
-        return redirect('recruiting_system:vacancy_detail', pk=pk)
+    
+    # Проверяем, не откликался ли уже кандидат
+    if Application.objects.filter(vacancy=vacancy, candidate=request.user.candidateprofile).exists():
+        messages.warning(request, 'Вы уже откликнулись на эту вакансию')
+        return redirect('recruiting_system:vacancy_detail', pk=vacancy.pk)
+    
+    if request.method == 'POST':
+        cover_letter = request.POST.get('cover_letter', '')
+        
+        # Создаем отклик
+        application = Application.objects.create(
+            vacancy=vacancy,
+            candidate=request.user.candidateprofile,
+            cover_letter=cover_letter,
+            status='pending'  # начальный статус
+        )
+        
+        messages.success(request, 'Ваш отклик успешно отправлен')
+        return redirect('recruiting_system:vacancy_detail', pk=vacancy.pk)
+    
+    return redirect('recruiting_system:vacancy_detail', pk=vacancy.pk)
 
 @login_required
 def vacancy_create(request):
@@ -181,7 +211,7 @@ def analytics_view(request):
 
 @login_required
 def activity_feed(request):
-    # Получаем по��едние действия (можно настроить под ваши нужды)
+    # Получаем поедние действия (можно настроить под ваши нужды)
     activities = Application.objects.all().order_by('-created_at')[:10]
     
     return render(request, 'recruiting_system/activity_feed.html', {

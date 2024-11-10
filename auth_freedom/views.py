@@ -93,7 +93,7 @@ def profile_view(request):
 @login_required
 def edit_candidate_profile(request):
     try:
-        profile = request.user.candidate_profile
+        profile = request.user.candidateprofile
     except CandidateProfile.DoesNotExist:
         messages.error(request, 'Профиль не найден')
         return redirect('auth_freedom:profile')

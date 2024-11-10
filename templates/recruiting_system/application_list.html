@@ -1,33 +1,126 @@
-{% extends 'auth_freedom/base.html' %}
+{% extends 'auth_freedom/base_recruiter.html' %}
+{% load static %}
 
 {% block title %}Список заявок{% endblock %}
 
+{% block extra_css %}
+<style>
+    .applications-container {
+        background: white;
+        border-radius: 8px;
+        padding: 30px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        margin: 20px;
+    }
+
+    .section-title {
+        font-size: 1.8rem;
+        color: #333;
+        margin-bottom: 30px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #4FB84F;
+    }
+
+    .applications-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 24px;
+    }
+
+    .application-card {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .application-title {
+        font-size: 1.2rem;
+        color: #333;
+        margin-bottom: 15px;
+        font-weight: 500;
+    }
+
+    .application-info {
+        color: #666;
+        font-size: 0.9rem;
+        margin-bottom: 15px;
+    }
+
+    .info-item {
+        margin-bottom: 8px;
+        display: flex;
+        gap: 8px;
+    }
+
+    .info-label {
+        font-weight: 500;
+        color: #333;
+    }
+
+    .action-button {
+        display: inline-block;
+        padding: 8px 16px;
+        background: #4FB84F;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        text-decoration: none;
+        font-weight: 500;
+        text-align: center;
+    }
+
+    .action-button:hover {
+        opacity: 0.9;
+        color: white;
+        text-decoration: none;
+    }
+
+    .empty-message {
+        text-align: center;
+        color: #666;
+        padding: 40px;
+        font-size: 1.1rem;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container">
-    <h2>Список заявок</h2>
-    <div class="row">
+<div class="applications-container">
+    <h2 class="section-title">Список заявок</h2>
+    <div class="applications-grid">
         {% for application in applications %}
-        <div class="col-md-6 mb-4">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">{{ application.vacancy.title }}</h5>
-                    <p class="card-text">
-                        {% if request.user.user_type == 'recruiter' %}
-                        <strong>Кандидат:</strong> {{ application.candidate.user.get_full_name }}<br>
-                        {% else %}
-                        <strong>Рекрутер:</strong> {{ application.vacancy.recruiter.user.get_full_name }}<br>
-                        {% endif %}
-                        <strong>Статус:</strong> {{ application.get_status_display }}<br>
-                        <strong>Дата подачи:</strong> {{ application.created_at|date:"d.m.Y" }}
-                    </p>
-                    <a href="{% url 'recruiting_system:application_detail' application.pk %}" class="btn btn-primary">Подробнее</a>
+            <div class="application-card">
+                <h3 class="application-title">{{ application.vacancy.title }}</h3>
+                <div class="application-info">
+                    {% if request.user.user_type == 'recruiter' %}
+                    <div class="info-item">
+                        <span class="info-label">Кандидат:</span>
+                        <span>{{ application.candidate.user.get_full_name }}</span>
+                    </div>
+                    {% else %}
+                    <div class="info-item">
+                        <span class="info-label">Рекруте��:</span>
+                        <span>{{ application.vacancy.recruiter.user.get_full_name }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="info-item">
+                        <span class="info-label">Статус:</span>
+                        <span>{{ application.get_status_display }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Дата подачи:</span>
+                        <span>{{ application.created_at|date:"d.m.Y" }}</span>
+                    </div>
                 </div>
+                <a href="{% url 'recruiting_system:application_detail' application.pk %}" class="action-button">
+                    Подробнее
+                </a>
             </div>
-        </div>
         {% empty %}
-        <div class="col-12">
-            <p>Нет доступных заявок</p>
-        </div>
+            <div class="empty-message">
+                <p>Нет доступных заявок</p>
+            </div>
         {% endfor %}
     </div>
 </div>
