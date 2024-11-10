@@ -63,6 +63,33 @@
         background: #45a049;
         color: white;
     }
+
+    @media (max-width: 767px) {
+        .vacancies-grid {
+            grid-template-columns: 1fr;
+            padding: 10px;
+        }
+
+        .vacancy-card {
+            margin-bottom: 15px;
+        }
+
+        .button-group {
+            flex-direction: column;
+        }
+
+        .create-btn {
+            width: 100%;
+            margin: 10px;
+            text-align: center;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .vacancy-title {
+            font-size: 18px;
+        }
+    }
 </style>
 {% endblock %}
 

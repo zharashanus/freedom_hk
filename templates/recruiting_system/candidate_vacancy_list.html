@@ -130,6 +130,36 @@
     .action-button:hover {
         opacity: 0.9;
     }
+
+    @media (max-width: 767px) {
+        .search-section {
+            margin: 10px;
+            padding: 15px;
+        }
+
+        .search-form {
+            grid-template-columns: 1fr;
+        }
+
+        .vacancy-card {
+            flex-direction: column;
+        }
+
+        .vacancy-actions {
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .action-button {
+            width: 100%;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .vacancy-title {
+            font-size: 18px;
+        }
+    }
 </style>
 {% endblock %}
 

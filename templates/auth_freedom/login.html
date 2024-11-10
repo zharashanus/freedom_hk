@@ -157,6 +157,43 @@
         object-fit: contain;
         margin-top: -15px;
     }
+
+    @media (max-width: 767px) {
+        .login-container {
+            flex-direction: column;
+        }
+
+        .left-side {
+            width: 100%;
+            margin-left: 0;
+            padding: 20px;
+        }
+
+        .left-side h1 {
+            margin-left: 0;
+            text-align: center;
+            max-width: 100%;
+            font-size: 32px;
+        }
+
+        .right-side {
+            width: 100%;
+        }
+
+        .form-container {
+            width: 90%;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .left-side h1 {
+            font-size: 24px;
+        }
+
+        .form-container {
+            width: 100%;
+        }
+    }
 </style>
 {% endblock %}
 
