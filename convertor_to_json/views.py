@@ -25,7 +25,7 @@ def upload_resumes(request):
             return redirect('convertor_to_json:upload_resumes')
             
         bulk_upload = BulkUpload.objects.create(
-            recruiter=request.user.recruiter_profile,
+            recruiter=request.user.recruiterprofile,
             total_files=len(files)
         )
         
@@ -86,7 +86,7 @@ def upload_status(request, upload_id):
         messages.error(request, 'Доступ запрещен')
         return redirect('recruiting_system:vacancy_list')
         
-    bulk_upload = get_object_or_404(BulkUpload, id=upload_id, recruiter=request.user.recruiter_profile)
+    bulk_upload = get_object_or_404(BulkUpload, id=upload_id, recruiter=request.user.recruiterprofile)
     resume_files = bulk_upload.resume_files.all()
     
     return render(request, 'convertor_to_json/upload_status.html', {

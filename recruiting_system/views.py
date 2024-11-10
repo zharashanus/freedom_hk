@@ -165,3 +165,73 @@ def candidate_detail(request, pk):
     return render(request, 'recruiting_system/candidate_detail.html', {
         'candidate': candidate
     })
+
+@login_required
+def analytics_view(request):
+    context = {
+        'active_vacancies': 21,  # Замените на реальные данные
+        'closed_vacancies': 15,
+        'avg_closing_time': 14,
+        'successful_responses': 20,
+        'rejected_responses': 80,
+        'processed_resumes': 65,
+        'matching_candidates': 40,
+    }
+    return render(request, 'recruiting_system/analytics.html', context)
+
+@login_required
+def activity_feed(request):
+    # Получаем по��едние действия (можно настроить под ваши нужды)
+    activities = Application.objects.all().order_by('-created_at')[:10]
+    
+    return render(request, 'recruiting_system/activity_feed.html', {
+        'activities': activities
+    })
+
+@login_required
+def candidate_responses(request):
+    if request.user.user_type != 'recruiter':
+        messages.error(request, 'Доступ запрещен')
+        return redirect('recruiting_system:vacancy_list')
+    
+    # Получаем все отклики для вакансий текущего рекрутера
+    responses = Application.objects.filter(
+        vacancy__recruiter__user=request.user
+    ).order_by('-created_at')
+    
+    return render(request, 'recruiting_system/candidate_responses.html', {
+        'responses': responses
+    })
+
+@login_required
+def candidate_vacancy_list(request):
+    if request.user.user_type != 'candidate':
+        messages.error(request, 'Доступ запрещен')
+        return redirect('recruiting_system:vacancy_list')
+    
+    specializations = Vacancy.objects.values_list('desired_specialization', flat=True).distinct()
+    levels = CandidateProfile.LEVEL_CHOICES
+    
+    vacancies = Vacancy.objects.filter(status='active').order_by('-created_at')
+    
+    # Фильтрация
+    specialization = request.GET.get('specialization')
+    level = request.GET.get('level')
+    
+    if specialization:
+        vacancies = vacancies.filter(desired_specialization=specialization)
+    if level:
+        vacancies = vacancies.filter(desired_level=level)
+    
+    # Проверяем отклики пользователя
+    for vacancy in vacancies:
+        vacancy.has_applied = Application.objects.filter(
+            vacancy=vacancy,
+            candidate=request.user.candidateprofile
+        ).exists()
+    
+    return render(request, 'recruiting_system/candidate_vacancy_list.html', {
+        'vacancies': vacancies,
+        'specializations': specializations,
+        'levels': levels,
+    })

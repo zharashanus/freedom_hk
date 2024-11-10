@@ -1,57 +1,130 @@
-{% extends 'auth_freedom/base.html' %}
+{% extends 'auth_freedom/base_recruiter.html' %}
+{% load static %}
 
 {% block title %}{{ vacancy.title }}{% endblock %}
 
+{% block extra_css %}
+<style>
+    .vacancy-detail {
+        background: white;
+        border-radius: 8px;
+        padding: 30px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        margin: 20px;
+    }
+
+    .vacancy-header {
+        margin-bottom: 30px;
+    }
+
+    .vacancy-title {
+        font-size: 1.8rem;
+        color: #333;
+        margin-bottom: 15px;
+    }
+
+    .vacancy-info {
+        color: #666;
+        font-size: 1rem;
+        margin-bottom: 30px;
+    }
+
+    .section-title {
+        font-size: 1.2rem;
+        color: #333;
+        margin: 20px 0 10px;
+    }
+
+    .section-content {
+        color: #666;
+        line-height: 1.6;
+    }
+
+    .button-group {
+        display: flex;
+        gap: 15px;
+        margin-top: 30px;
+    }
+
+    .action-button {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 1rem;
+        text-decoration: none;
+    }
+
+    .edit-btn {
+        background: #ffc107;
+        color: #333;
+    }
+
+    .analyze-btn {
+        background: #17a2b8;
+        color: white;
+    }
+
+    .apply-btn {
+        background: #4CAF50;
+        color: white;
+    }
+
+    textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        margin: 10px 0;
+        min-height: 100px;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container">
-    <div class="card">
-        <div class="card-body">
-            <h2 class="card-title">{{ vacancy.title }}</h2>
-            <div class="card-text">
-                <p><strong>Рекрутер:</strong> {{ vacancy.recruiter.user.get_full_name }}</p>
-                <p><strong>Статус:</strong> {{ vacancy.get_status_display }}</p>
-                <p><strong>Создано:</strong> {{ vacancy.created_at|date:"d.m.Y" }}</p>
-                
-                <h4>Описание вакансии:</h4>
-                <p>{{ vacancy.description|linebreaks }}</p>
-                
-                <h4>Требования:</h4>
-                <p>{{ vacancy.requirements|linebreaks }}</p>
-
-                {% if request.user.user_type == 'candidate' %}
-                    {% if not has_applied %}
-                    <form method="post" action="{% url 'recruiting_system:apply_vacancy' vacancy.pk %}">
-                        {% csrf_token %}
-                        <div class="form-group">
-                            <label for="cover_letter">Сопроводительное письмо:</label>
-                            <textarea class="form-control" id="cover_letter" name="cover_letter" rows="4"></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary mt-3">Откликнуться</button>
-                    </form>
-                    {% else %}
-                    <div class="alert alert-info">
-                        Вы уже откликнулись на эту вакансию
-                    </div>
-                    {% endif %}
-                {% endif %}
-
-                {% if request.user.user_type == 'recruiter' and vacancy.recruiter.user == request.user or request.user.user_type == 'admin' %}
-                <div class="mt-3">
-                    <a href="{% url 'recruiting_system:vacancy_edit' vacancy.pk %}" class="btn btn-warning">
-                        Редактировать вакансию
-                    </a>
-                </div>
-                {% endif %}
-
-                {% if request.user.user_type == 'recruiter' %}
-                <div class="mt-3">
-                    <a href="{% url 'analyze_candidates:analyze_candidates' vacancy.pk %}" class="btn btn-info">
-                        Анализ кандидатов с помощью AI
-                    </a>
-                </div>
-                {% endif %}
-            </div>
+<div class="vacancy-detail">
+    <div class="vacancy-header">
+        <h1 class="vacancy-title">{{ vacancy.title }}</h1>
+        <div class="vacancy-info">
+            <p><strong>Рекрутер:</strong> {{ vacancy.recruiter.user.get_full_name }}</p>
+            <p><strong>Статус:</strong> {{ vacancy.get_status_display }}</p>
+            <p><strong>Создано:</strong> {{ vacancy.created_at|date:"d.m.Y" }}</p>
         </div>
+    </div>
+
+    <h2 class="section-title">Описание вакансии:</h2>
+    <div class="section-content">{{ vacancy.description|linebreaks }}</div>
+
+    <h2 class="section-title">Требования:</h2>
+    <div class="section-content">{{ vacancy.requirements|linebreaks }}</div>
+
+    <div class="button-group">
+        {% if request.user.user_type == 'candidate' %}
+            {% if not has_applied %}
+            <form method="post" action="{% url 'recruiting_system:apply_vacancy' vacancy.pk %}" style="width: 100%;">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="cover_letter">Сопроводительное письмо:</label>
+                    <textarea id="cover_letter" name="cover_letter"></textarea>
+                </div>
+                <button type="submit" class="action-button apply-btn">Откликнуться</button>
+            </form>
+            {% else %}
+            <div class="alert alert-info">Вы уже откликнулись на эту вакансию</div>
+            {% endif %}
+        {% endif %}
+
+        {% if request.user.user_type == 'recruiter' and vacancy.recruiter.user == request.user or request.user.user_type == 'admin' %}
+            <a href="{% url 'recruiting_system:vacancy_edit' vacancy.pk %}" class="action-button edit-btn">
+                Редактировать вакансию
+            </a>
+        {% endif %}
+
+        {% if request.user.user_type == 'recruiter' %}
+            <a href="{% url 'analyze_candidates:analyze_candidates' vacancy.pk %}" class="action-button analyze-btn">
+                Анализ кандидатов с помощью AI
+            </a>
+        {% endif %}
     </div>
 </div>
 {% endblock %} 

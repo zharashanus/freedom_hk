@@ -1,0 +1,32 @@
+<div class="info-item">
+    <label>Email</label>
+    <span>{{ profile.user.email }}</span>
+</div>
+<div class="info-item">
+    <label>Телефон</label>
+    <span>{{ profile.phone|default:"Не указан" }}</span>
+</div>
+<div class="info-item">
+    <label>Специализация</label>
+    <span>{{ profile.specialization|default:"Не указана" }}</span>
+</div>
+<div class="info-item">
+    <label>Опыт работы</label>
+    <span>{{ profile.experience }} лет</span>
+</div>
+<div class="info-item">
+    <label>Уровень</label>
+    <span>{{ profile.get_level_display }}</span>
+</div>
+<div class="info-item">
+    <label>Локация</label>
+    <span>{{ profile.country }}, {{ profile.region }}</span>
+</div>
+<div class="info-item">
+    <label>Желаемая зарплата</label>
+    <span>{{ profile.desired_salary|default:"Не указана" }}</span>
+</div>
+<div class="info-item">
+    <label>Статус поиска</label>
+    <span>{{ profile.get_search_status_display }}</span>
+</div> 

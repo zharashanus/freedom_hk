@@ -1,56 +1,154 @@
-{% extends 'auth_freedom/base.html' %}
+{% extends 'auth_freedom/base_recruiter.html' %}
+{% load static %}
 
 {% block title %}Профиль рекрутера{% endblock %}
 
+{% block extra_css %}
+<style>
+    .profile-info {
+        display: flex;
+        padding: 30px;
+        background: white;
+        border-radius: 10px;
+        margin: 20px;
+        gap: 40px;
+    }
+
+    .profile-left {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .profile-image img {
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .profile-username {
+        color: #4CAF50;
+        font-size: 40px !important;
+        font-weight: 500;
+    }
+
+    .profile-role {
+        font-weight: bold;
+        margin-bottom: 10px;
+        font-size: 30px !important;
+        color: #4CAF50 !important;
+    }
+
+    .profile-details {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .profile-details p {
+        margin: 5px 0;
+        font-size: 16px;
+    }
+
+    .profile-right {
+        flex: 1;
+    }
+
+    .about-section {
+        margin-bottom: 30px;
+    }
+
+    .about-section h2 {
+        color: #333;
+        margin-bottom: 15px;
+        font-size: 20px;
+    }
+
+    .create-vacancy {
+        margin-top: 20px;
+        padding: 10px 20px;
+        background-color: #28a745;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        margin-left: 30px;
+    }
+
+    .create-vacancy:hover {
+        background-color: #218838;
+    }
+
+    .profile-left p {
+        margin: 8px 0;
+        font-size: 16px;
+        color: #333;
+    }
+
+    .profile-left p strong {
+        font-weight: 600;
+        color: #000;
+    }
+
+    .button-group {
+        display: flex;
+        gap: 15px;
+        margin: 20px 30px;
+    }
+
+    .action-button {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        color: white;
+        font-weight: 500;
+    }
+
+    .create-btn {
+        background-color: #28a745;
+    }
+
+    .logout-btn {
+        background-color: #dc3545;
+    }
+
+    .action-button:hover {
+        opacity: 0.9;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container">
-    <h2>Профиль рекрутера</h2>
-    <div class="row">
-        <div class="col-md-8">
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h5 class="card-title">{{ profile.user.get_full_name|default:profile.user.username }}</h5>
-                    <p class="card-text">
-                        <strong>Компания:</strong> {{ profile.company|default:"Не указано" }}<br>
-                        <strong>Специализация:</strong> {{ profile.specialization|default:"Не указано" }}<br>
-                        <strong>Опыт работы:</strong> {{ profile.experience }} лет<br>
-                        <strong>Регион:</strong> {{ profile.region|default:"Не указано" }}<br>
-                        <strong>Успешные наймы:</strong> {{ profile.successful_hires }}<br>
-                        <strong>Активные вакансии:</strong> {{ profile.active_vacancies }}
-                    </p>
-                    <h6>Языки:</h6>
-                    <ul>
-                        {% for lang in profile.languages %}
-                            <li>{{ lang }}</li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            </div>
+<section class="profile-info">
+    <div class="profile-left">
+        <div class="profile-image">
+            <img src="{% static 'pics/profile.png' %}" alt="Profile Image">
         </div>
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Управление вакансиями</h5>
-                    <div class="d-grid gap-2">
-                        <a href="{% url 'recruiting_system:vacancy_create' %}" class="btn btn-success">
-                            Создать новую вакансию
-                        </a>
-                        <a href="{% url 'recruiting_system:vacancy_list' %}" class="btn btn-primary">
-                            Управление вакансиями
-                        </a>
-                        <a href="{% url 'recruiting_system:candidate_list' %}" class="btn btn-info">
-                            Просмотр кандидатов
-                        </a>
-                        <a href="{% url 'recruiting_system:application_list' %}" class="btn btn-outline-primary">
-                            Отклики кандидатов
-                        </a>
-                        <a href="{% url 'convertor_to_json:upload_resumes' %}" class="btn btn-secondary">
-                            Загрузить резюме
-                        </a>
-                    </div>
-                </div>
-            </div>
+        <p class="profile-username">{{ profile.user.username }}</p>
+        <p class="profile-role">Рекрутер</p>
+        <p><strong>Имя:</strong> {{ profile.first_name }} {{ profile.last_name }}</p>
+        <p><strong>Департамент:</strong> {{ profile.department|default:"Не указан" }}</p>
+        <p><strong>Успешные наймы:</strong> {{ profile.successful_applications }}</p>
+        <p><strong>Активные вакансии:</strong> {{ profile.processed_applications }}</p>
+    </div>
+
+    <div class="profile-right">
+        <div class="about-section">
+            <h2>О себе</h2>
+            <p>👋 {{ profile.about_me|default:"Информация о себе не указана" }}</p>
         </div>
     </div>
+</section>
+
+<div class="button-group">
+    <a href="{% url 'recruiting_system:vacancy_create' %}" class="action-button create-btn">Создать вакансию</a>
+    <a href="{% url 'auth_freedom:logout' %}" class="action-button logout-btn">Выйти</a>
 </div>
 {% endblock %} 

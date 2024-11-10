@@ -1,0 +1,178 @@
+{% extends 'auth_freedom/base_recruiter.html' %}
+{% load static %}
+
+{% block title %}Аналитика{% endblock %}
+
+{% block extra_css %}
+<style>
+    .analytics-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 24px;
+        margin-top: 30px;
+    }
+
+    .analytics-card {
+        background: white;
+        border-radius: 24px;
+        padding: 24px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .card-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    .card-header img {
+        width: 24px;
+        height: 24px;
+    }
+
+    .card-title {
+        font-size: 18px;
+        color: #333;
+        margin: 0;
+    }
+
+    .stats-row {
+        display: flex;
+        justify-content: center;
+        margin-top: 43px;
+        gap: 188px;
+    }
+
+    .stat-item {
+        text-align: center;
+    }
+
+    .stat-label {
+        color: #666;
+        font-size: 14px;
+        margin-bottom: 8px;
+    }
+
+    .stat-value {
+        font-size: 24px;
+        font-weight: bold;
+        color: #4FB84F;
+    }
+
+    .progress-circle {
+        width: 120px;
+        height: 120px;
+        margin: 20px auto;
+        position: relative;
+    }
+
+    .progress-circle svg {
+        transform: rotate(-90deg);
+    }
+
+    .progress-circle circle {
+        fill: none;
+        stroke-width: 8;
+    }
+
+    .progress-bg {
+        stroke: #f0f0f0;
+    }
+
+    .progress-bar {
+        stroke: #4FB84F;
+        stroke-linecap: round;
+    }
+
+    .progress-text {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 24px;
+        font-weight: bold;
+        color: #4FB84F;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="analytics-grid">
+    <!-- Карточка активных и закрытых вакансий -->
+    <div class="analytics-card">
+        <div class="card-header">
+            <img src="{% static 'pics/recruiter_profile/copy.png' %}" alt="Vacancies">
+            <h2 class="card-title">Количество активных и закрытых вакансий за месяц</h2>
+        </div>
+        <div class="stats-row">
+            <div class="stat-item">
+                <div class="stat-label">Активные вакансии</div>
+                <div class="stat-value">21</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Закрытые вакансии</div>
+                <div class="stat-value">15</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Карточка среднего времени -->
+    <div class="analytics-card">
+        <div class="card-header">
+            <img src="{% static 'pics/recruiter_profile/clock.png' %}" alt="Time">
+            <h2 class="card-title">Среднее время на закрытие вакансии</h2>
+        </div>
+        <div class="progress-circle">
+            <svg width="120" height="120" viewBox="0 0 120 120">
+                <circle class="progress-bg" cx="60" cy="60" r="54" />
+                <circle class="progress-bar" cx="60" cy="60" r="54" 
+                        stroke-dasharray="339.292" 
+                        stroke-dashoffset="84.823" />
+            </svg>
+            <div class="progress-text">15</div>
+        </div>
+    </div>
+
+    <!-- Карточка статистики откликов -->
+    <div class="analytics-card">
+        <div class="card-header">
+            <img src="{% static 'pics/recruiter_profile/analytics.png' %}" alt="Responses">
+            <h2 class="card-title">Статистика откликов</h2>
+        </div>
+        <div class="stats-row">
+            <div class="stat-item">
+                <div class="stat-label">Успешные отклики</div>
+                <div class="stat-value">20%</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Отклоненные отклики</div>
+                <div class="stat-value">80%</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Карточка процента обработанных резюме -->
+    <div class="analytics-card">
+        <div class="card-header">
+            <img src="{% static 'pics/recruiter_profile/people.png' %}" alt="Processed">
+            <h2 class="card-title">Процент обработанных резюме</h2>
+        </div>
+        <div class="progress-circle">
+            <svg width="120" height="120" viewBox="0 0 120 120">
+                <circle class="progress-bg" cx="60" cy="60" r="54" />
+                <circle class="progress-bar" cx="60" cy="60" r="54" 
+                        stroke-dasharray="339.292" 
+                        stroke-dashoffset="118.752" />
+            </svg>
+            <div class="progress-text">65%</div>
+        </div>
+        <div class="stats-row">
+            <div class="stat-item">
+                <div class="stat-label">Соответствуют требованиям</div>
+                <div class="stat-value">40%</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

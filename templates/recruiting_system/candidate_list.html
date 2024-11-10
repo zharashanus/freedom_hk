@@ -1,82 +1,167 @@
-{% extends 'auth_freedom/base.html' %}
+{% extends 'auth_freedom/base_recruiter.html' %}
+{% load static %}
 
 {% block title %}Список кандидатов{% endblock %}
 
-{% block content %}
-<div class="container">
-    <h2>Список кандидатов</h2>
-    
-    <!-- Фильтры -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <form method="get" class="row g-3">
-                <div class="col-md-3">
-                    <label for="specialization" class="form-label">Специализация</label>
-                    <input type="text" class="form-control" id="specialization" name="specialization" 
-                           value="{{ request.GET.specialization|default:'' }}">
-                </div>
-                <div class="col-md-2">
-                    <label for="experience" class="form-label">Опыт от (лет)</label>
-                    <input type="number" class="form-control" id="experience" name="experience" 
-                           value="{{ request.GET.experience|default:'' }}">
-                </div>
-                <div class="col-md-3">
-                    <label for="level" class="form-label">Уровень</label>
-                    <select class="form-select" id="level" name="level">
-                        <option value="">Все</option>
-                        {% for value, label in level_choices %}
-                        <option value="{{ value }}" {% if request.GET.level == value %}selected{% endif %}>
-                            {{ label }}
-                        </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label for="search_status" class="form-label">Статус поиска</label>
-                    <select class="form-select" id="search_status" name="search_status">
-                        <option value="">Все</option>
-                        {% for value, label in search_status_choices %}
-                        <option value="{{ value }}" {% if request.GET.search_status == value %}selected{% endif %}>
-                            {{ label }}
-                        </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-1 d-flex align-items-end">
-                    <button type="submit" class="btn btn-primary">Найти</button>
-                </div>
-            </form>
-        </div>
-    </div>
+{% block extra_css %}
+<style>
+    .filters {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        margin: 20px;
+    }
 
-    <!-- Список кандидатов -->
-    <div class="row">
-        {% for candidate in candidates %}
-        <div class="col-md-6 mb-4">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">{{ candidate.first_name }} {{ candidate.last_name }}</h5>
-                    <p class="card-text">
-                        <strong>Специализация:</strong> {{ candidate.specialization }}<br>
-                        <strong>Опыт:</strong> {{ candidate.experience }} лет<br>
-                        <strong>Уровень:</strong> {{ candidate.get_level_display }}<br>
-                        <strong>Статус поиска:</strong> {{ candidate.get_search_status_display }}<br>
-                        <strong>Локация:</strong> {{ candidate.country }}, {{ candidate.region }}
-                    </p>
-                    <div class="d-flex justify-content-between">
-                        <a href="{% url 'recruiting_system:candidate_detail' candidate.pk %}" 
-                           class="btn btn-primary">Подробнее</a>
-                        <a href="{% url 'analyze_candidates:analyze_candidates' candidate.pk %}" 
-                           class="btn btn-info">AI Анализ</a>
-                    </div>
-                </div>
-            </div>
+    .candidates-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 24px;
+        padding: 20px;
+    }
+
+    .candidate-card {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .candidate-title {
+        font-size: 1.2rem;
+        color: #333;
+        margin-bottom: 15px;
+    }
+
+    .candidate-info {
+        color: #666;
+        font-size: 0.9rem;
+        margin-bottom: 15px;
+    }
+
+    .button-group {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+    }
+
+    .action-button {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 4px;
+        text-decoration: none;
+        font-size: 0.9rem;
+        cursor: pointer;
+    }
+
+    .details-btn {
+        background: #4CAF50;
+        color: white;
+    }
+
+    .analyze-btn {
+        background: #17a2b8;
+        color: white;
+    }
+
+    .filter-form {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .form-group label {
+        color: #333;
+        font-size: 0.9rem;
+    }
+
+    .form-group input,
+    .form-group select {
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 0.9rem;
+    }
+
+    .search-btn {
+        background: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 8px 16px;
+        cursor: pointer;
+        align-self: flex-end;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="filters">
+    <form method="get" class="filter-form">
+        <div class="form-group">
+            <label for="specialization">Специализация</label>
+            <input type="text" id="specialization" name="specialization" 
+                   value="{{ request.GET.specialization|default:'' }}">
         </div>
-        {% empty %}
-        <div class="col-12">
-            <p>Кандидаты не найдены</p>
+        <div class="form-group">
+            <label for="experience">Опыт от (лет)</label>
+            <input type="number" id="experience" name="experience" 
+                   value="{{ request.GET.experience|default:'' }}">
         </div>
-        {% endfor %}
+        <div class="form-group">
+            <label for="level">Уровень</label>
+            <select id="level" name="level">
+                <option value="">Все</option>
+                {% for value, label in level_choices %}
+                <option value="{{ value }}" {% if request.GET.level == value %}selected{% endif %}>
+                    {{ label }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="search_status">Статус поиска</label>
+            <select id="search_status" name="search_status">
+                <option value="">Все</option>
+                {% for value, label in search_status_choices %}
+                <option value="{{ value }}" {% if request.GET.search_status == value %}selected{% endif %}>
+                    {{ label }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="search-btn">Найти</button>
+    </form>
+</div>
+
+<div class="candidates-grid">
+    {% for candidate in candidates %}
+    <div class="candidate-card">
+        <h3 class="candidate-title">{{ candidate.first_name }} {{ candidate.last_name }}</h3>
+        <div class="candidate-info">
+            <p><strong>Специализация:</strong> {{ candidate.specialization }}</p>
+            <p><strong>Опыт:</strong> {{ candidate.experience }} лет</p>
+            <p><strong>Уровень:</strong> {{ candidate.get_level_display }}</p>
+            <p><strong>Статус поиска:</strong> {{ candidate.get_search_status_display }}</p>
+            <p><strong>Локация:</strong> {{ candidate.country }}, {{ candidate.region }}</p>
+        </div>
+        <div class="button-group">
+            <a href="{% url 'recruiting_system:candidate_detail' candidate.pk %}" 
+               class="action-button details-btn">Подробнее</a>
+            <a href="{% url 'analyze_candidates:analyze_candidates' candidate.pk %}" 
+               class="action-button analyze-btn">AI Анализ</a>
+        </div>
     </div>
+    {% empty %}
+    <div class="candidate-card">
+        <p>Кандидаты не найдены</p>
+    </div>
+    {% endfor %}
 </div>
 {% endblock %} 

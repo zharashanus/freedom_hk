@@ -1,0 +1,203 @@
+{% extends 'auth_freedom/base_candidate.html' %}
+{% load static %}
+
+{% block title %}Доступные вакансии{% endblock %}
+
+{% block extra_css %}
+<style>
+    .search-section {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        margin: 20px;
+    }
+
+    .search-form {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .form-group label {
+        color: #333;
+        font-size: 0.9rem;
+    }
+
+    .form-group input,
+    .form-group select {
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+
+    .search-btn {
+        background: #4CAF50;
+        color: white;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        align-self: flex-end;
+    }
+
+    .vacancies-list {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        padding: 20px;
+    }
+
+    .vacancy-card {
+        background: white;
+        border-radius: 8px;
+        padding: 25px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 20px;
+    }
+
+    .vacancy-main {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .vacancy-title {
+        font-size: 1.4rem;
+        color: #333;
+        margin: 0;
+    }
+
+    .vacancy-company {
+        color: #4CAF50;
+        font-size: 1.1rem;
+    }
+
+    .vacancy-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-top: 10px;
+    }
+
+    .detail-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #666;
+    }
+
+    .detail-item img {
+        width: 20px;
+        height: 20px;
+    }
+
+    .button-group {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        justify-content: center;
+    }
+
+    .action-button {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        text-decoration: none;
+        font-weight: 500;
+        text-align: center;
+    }
+
+    .details-btn {
+        background: #4CAF50;
+        color: white;
+    }
+
+    .apply-btn {
+        background: white;
+        color: #4CAF50;
+        border: 2px solid #4CAF50;
+    }
+
+    .action-button:hover {
+        opacity: 0.9;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="search-section">
+    <form method="get" class="search-form">
+        <div class="form-group">
+            <label for="specialization">Специализация</label>
+            <select id="specialization" name="specialization">
+                <option value="">Все</option>
+                {% for spec in specializations %}
+                <option value="{{ spec }}" {% if request.GET.specialization == spec %}selected{% endif %}>
+                    {{ spec }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="level">Уровень</label>
+            <select id="level" name="level">
+                <option value="">Все</option>
+                {% for level in levels %}
+                <option value="{{ level.0 }}" {% if request.GET.level == level.0 %}selected{% endif %}>
+                    {{ level.1 }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="search-btn">Найти</button>
+    </form>
+</div>
+
+<div class="vacancies-list">
+    {% for vacancy in vacancies %}
+    <div class="vacancy-card">
+        <div class="vacancy-main">
+            <h2 class="vacancy-title">{{ vacancy.title }}</h2>
+            <div class="vacancy-company">Freedom Holding Corp.</div>
+            <div class="vacancy-details">
+                <div class="detail-item">
+                    <i class="fas fa-map-marker-alt" style="color: #4CAF50; font-size: 18px;"></i>
+                    {{ vacancy.country }}, {{ vacancy.region }}
+                </div>
+                <div class="detail-item">
+                    <i class="fas fa-briefcase" style="color: #4CAF50; font-size: 18px;"></i>
+                    {{ vacancy.desired_experience }} лет опыта
+                </div>
+                <div class="detail-item">
+                    <i class="fas fa-money-bill-wave" style="color: #4CAF50; font-size: 18px;"></i>
+                    {{ vacancy.salary_min }} - {{ vacancy.salary_max }}
+                </div>
+            </div>
+        </div>
+        <div class="button-group">
+            <a href="{% url 'recruiting_system:vacancy_detail' vacancy.pk %}" class="action-button details-btn">
+                Подробнее
+            </a>
+            {% if not vacancy.has_applied %}
+            <a href="{% url 'recruiting_system:apply_vacancy' vacancy.pk %}" class="action-button apply-btn">
+                Откликнуться
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    {% empty %}
+    <div class="vacancy-card">
+        <p>Нет доступных вакансий</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %} 

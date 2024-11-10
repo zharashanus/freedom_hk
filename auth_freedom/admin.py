@@ -5,6 +5,25 @@ from django.http import HttpResponseRedirect
 from django.contrib import messages
 from .models import User, RecruiterProfile, CandidateProfile
 from analyze_candidates.models import CandidateAnalysis
+from django import forms
+
+class SocialNetworksWidget(forms.Textarea):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.attrs['rows'] = 3
+        self.attrs['placeholder'] = '''{
+    "linkedin": "https://linkedin.com/in/username",
+    "telegram": "@username",
+    "instagram": "@username"
+}'''
+
+class RecruiterProfileAdminForm(forms.ModelForm):
+    class Meta:
+        model = RecruiterProfile
+        fields = '__all__'
+        widgets = {
+            'social_networks': SocialNetworksWidget(),
+        }
 
 class CustomUserAdmin(UserAdmin):
     list_display = ('username', 'email', 'first_name', 'last_name', 'user_type', 'is_staff')
@@ -18,9 +37,55 @@ class CustomUserAdmin(UserAdmin):
 
     def get_form(self, request, obj=None, **kwargs):
         form = super().get_form(request, obj, **kwargs)
-        if not obj and not request.user.is_superuser:  # Если создается новый пользователь и не суперпользователь
+        if not obj and not request.user.is_superuser:
             form.base_fields['user_type'].choices = [('candidate', 'Кандидат')]
         return form
+
+class RecruiterProfileAdmin(admin.ModelAdmin):
+    form = RecruiterProfileAdminForm
+    list_display = ('get_full_name', 'email', 'phone', 'department', 'country', 'processed_applications')
+    search_fields = ('first_name', 'last_name', 'email', 'phone', 'department')
+    list_filter = ('department', 'country', 'gender')
+    
+    fieldsets = (
+        ('Основная информация', {
+            'fields': (
+                ('first_name', 'last_name'),
+                ('email', 'phone'),
+                'gender',
+                'birth_date'
+            ),
+            'classes': ('wide',)
+        }),
+        ('Рабочая информация', {
+            'fields': (
+                'department',
+                ('country', 'region'),
+                ('processed_applications', 'successful_applications')
+            ),
+            'classes': ('wide',)
+        }),
+        ('Социальные сети', {
+            'fields': ('social_networks',),
+            'description': 'Введите ссылки на социальные сети в формате JSON. Поддерживаемые сети: linkedin, telegram, instagram',
+            'classes': ('wide',)
+        }),
+    )
+
+    def get_full_name(self, obj):
+        return f"{obj.first_name} {obj.last_name}"
+    get_full_name.short_description = 'Полное имя'
+
+    def save_model(self, request, obj, form, change):
+        try:
+            # Проверяем валидность JSON для social_networks
+            if isinstance(obj.social_networks, str):
+                import json
+                obj.social_networks = json.loads(obj.social_networks)
+        except json.JSONDecodeError:
+            messages.error(request, 'Неверный формат JSON для социальных сетей')
+            return
+        super().save_model(request, obj, form, change)
 
 class CandidateProfileAdmin(admin.ModelAdmin):
     list_display = ('first_name', 'last_name', 'email', 'phone', 'specialization')
@@ -47,5 +112,5 @@ class CandidateProfileAdmin(admin.ModelAdmin):
         return HttpResponseRedirect("../")
 
 admin.site.register(User, CustomUserAdmin)
-admin.site.register(RecruiterProfile)
+admin.site.register(RecruiterProfile, RecruiterProfileAdmin)
 admin.site.register(CandidateProfile, CandidateProfileAdmin)

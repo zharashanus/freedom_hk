@@ -1,0 +1,13 @@
+{% if profile.work_experience %}
+    {% for exp in profile.work_experience %}
+    <div class="experience-item">
+        <h3>{{ exp.company }} - {{ exp.position }}</h3>
+        <div class="experience-date">
+            {{ exp.start_date }} - {{ exp.end_date|default:"По настоящее время" }}
+        </div>
+        <p>{{ exp.description }}</p>
+    </div>
+    {% endfor %}
+{% else %}
+    <p>Опыт работы не указан</p>
+{% endif %} 

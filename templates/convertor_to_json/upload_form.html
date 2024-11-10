@@ -1,39 +1,198 @@
-{% extends 'auth_freedom/base.html' %}
+{% extends 'auth_freedom/base_recruiter.html' %}
+{% load static %}
 
 {% block title %}Загрузка резюме{% endblock %}
 
-{% block content %}
-<div class="container">
-    <h2>Массовая загрузка резюме</h2>
-    
-    <div class="card">
-        <div class="card-body">
-            <form method="post" enctype="multipart/form-data">
-                {% csrf_token %}
-                <div class="mb-3">
-                    <label for="resume_files" class="form-label">Выберите файлы резюме</label>
-                    <input type="file" class="form-control" id="resume_files" name="resume_files" 
-                           multiple accept=".pdf,.doc,.docx,.pptx,.txt">
-                    <div class="form-text">
-                        Поддерживаемые форматы: PDF, DOC, DOCX, PPTX, TXT
-                    </div>
-                </div>
-                <div class="progress mb-3 d-none" id="uploadProgress">
-                    <div class="progress-bar progress-bar-striped progress-bar-animated" 
-                         role="progressbar" style="width: 0%">
-                        0%
-                    </div>
-                </div>
-                <button type="submit" class="btn btn-primary">Загрузить</button>
-            </form>
-        </div>
-    </div>
-</div>
+{% block extra_css %}
+<style>
+    .content {
+        padding: 20px;
+    }
 
+    .title {
+        font-size: 24px;
+        color: #333;
+        margin-bottom: 20px;
+    }
+
+    .upload-box {
+        border: 2px dashed #ddd;
+        padding: 40px;
+        text-align: center;
+        border-radius: 8px;
+        background-color: #fff;
+        cursor: pointer;
+        transition: border-color 0.3s ease;
+    }
+
+    .upload-box:hover {
+        border-color: #4FB84F;
+    }
+
+    .upload-icon {
+        font-size: 48px;
+        margin-bottom: 15px;
+        display: block;
+    }
+
+    .upload-button {
+        background-color: #4FB84F;
+        color: white;
+        padding: 12px 24px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 16px;
+        margin-top: 20px;
+        transition: background-color 0.3s ease;
+    }
+
+    .upload-button:hover {
+        background-color: #45a049;
+    }
+
+    .file-list {
+        margin: 15px 0;
+        padding: 10px;
+        border-radius: 5px;
+        background-color: #fff;
+    }
+
+    .file-item {
+        display: flex;
+        align-items: center;
+        padding: 5px 10px;
+        margin-bottom: 5px;
+        background-color: #f8f9fa;
+        border-radius: 3px;
+    }
+
+    .file-name {
+        flex: 1;
+    }
+
+    .file-remove {
+        color: #dc3545;
+        cursor: pointer;
+        padding: 0 5px;
+    }
+
+    .alert {
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 5px;
+    }
+
+    .alert-success {
+        background-color: #d4edda;
+        color: #155724;
+    }
+
+    .alert-warning {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+
+    .alert-danger {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="content">
+    <h1 class="title">Массовая загрузка резюме</h1>
+    <form method="post" enctype="multipart/form-data" id="uploadForm">
+        {% csrf_token %}
+        <div class="upload-box" id="dropZone">
+            <span class="upload-icon" id="uploadIcon">⬇️</span>
+            <p>Перетащите сюда файлы или <label for="fileInput" style="cursor: pointer; color: #4FB84F;">выберите</label></p>
+            <input type="file" id="fileInput" name="resume_files" multiple 
+                   accept=".pdf,.doc,.docx,.pptx,.txt" style="display: none;">
+        </div>
+
+        <div id="fileList" class="file-list"></div>
+
+        <div class="progress mb-3 d-none" id="uploadProgress">
+            <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                 role="progressbar" style="width: 0%">0%</div>
+        </div>
+
+        <button type="submit" class="upload-button">Загрузить</button>
+    </form>
+
+    {% if messages %}
+    <div class="messages mt-3">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</section>
+{% endblock %}
+
+{% block extra_js %}
 <script>
-document.querySelector('form').addEventListener('submit', function(e) {
-    document.getElementById('uploadProgress').classList.remove('d-none');
-    // Обновление прогресса через WebSocket
-});
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const uploadForm = document.getElementById('uploadForm');
+    const fileList = document.getElementById('fileList');
+    const uploadIcon = document.getElementById('uploadIcon');
+
+    uploadIcon.addEventListener('click', () => {
+        fileInput.click();
+    });
+
+    fileInput.addEventListener('change', updateFileList);
+
+    function updateFileList() {
+        fileList.innerHTML = '';
+        Array.from(fileInput.files).forEach(file => {
+            const fileItem = document.createElement('div');
+            fileItem.className = 'file-item';
+            
+            const fileName = document.createElement('span');
+            fileName.className = 'file-name';
+            fileName.textContent = file.name;
+            
+            const removeButton = document.createElement('span');
+            removeButton.className = 'file-remove';
+            removeButton.textContent = '✕';
+            removeButton.onclick = () => {
+                const newFiles = Array.from(fileInput.files).filter(f => f !== file);
+                const newFileList = new DataTransfer();
+                newFiles.forEach(f => newFileList.items.add(f));
+                fileInput.files = newFileList.files;
+                updateFileList();
+            };
+            
+            fileItem.appendChild(fileName);
+            fileItem.appendChild(removeButton);
+            fileList.appendChild(fileItem);
+        });
+    }
+
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.style.borderColor = '#ddd';
+        fileInput.files = e.dataTransfer.files;
+        updateFileList();
+    });
+
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.style.borderColor = '#4caf50';
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.style.borderColor = '#ddd';
+    });
+
+    uploadForm.addEventListener('submit', () => {
+        document.getElementById('uploadProgress').classList.remove('d-none');
+    });
 </script>
-{% endblock %} 
+{% endblock %}

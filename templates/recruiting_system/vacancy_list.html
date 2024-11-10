@@ -1,42 +1,99 @@
-{% extends 'auth_freedom/base.html' %}
+{% extends 'auth_freedom/base_recruiter.html' %}
+{% load static %}
 
 {% block title %}Список вакансий{% endblock %}
 
+{% block extra_css %}
+<style>
+    .vacancies-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 24px;
+        padding: 20px;
+    }
+
+    .vacancy-card {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .vacancy-title {
+        font-size: 1.2rem;
+        color: #333;
+        margin-bottom: 15px;
+    }
+
+    .vacancy-info {
+        color: #666;
+        font-size: 0.9rem;
+        margin-bottom: 15px;
+    }
+
+    .button-group {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    .create-btn {
+        background: #4CAF50;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        margin: 20px;
+    }
+
+    .details-btn {
+        background: #4CAF50;
+        color: white;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 4px;
+        text-decoration: none;
+        font-size: 0.9rem;
+    }
+
+    .details-btn:hover {
+        background: #45a049;
+        color: white;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container">
-    <h2>Список вакансий</h2>
-    {% if request.user.is_authenticated %}
-        {% if request.user.user_type == 'recruiter' %}
-        <div class="mb-3">
-            <a href="{% url 'recruiting_system:vacancy_create' %}" class="btn btn-primary">Создать вакансию</a>
-        </div>
-        {% endif %}
-        
-        <div class="row">
-            {% for vacancy in vacancies %}
-            <div class="col-md-6 mb-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ vacancy.title }}</h5>
-                        <p class="card-text">
-                            <strong>Рекрутер:</strong> {{ vacancy.recruiter.user.get_full_name }}<br>
-                            <strong>Статус:</strong> {{ vacancy.get_status_display }}<br>
-                            <strong>Создано:</strong> {{ vacancy.created_at|date:"d.m.Y" }}
-                        </p>
-                        <a href="{% url 'recruiting_system:vacancy_detail' vacancy.pk %}" class="btn btn-primary">Подробнее</a>
-                    </div>
-                </div>
-            </div>
-            {% empty %}
-            <div class="col-12">
-                <p>Нет доступных вакансий</p>
-            </div>
-            {% endfor %}
-        </div>
-    {% else %}
-        <div class="alert alert-info">
-            Для просмотра вакансий необходимо <a href="{% url 'auth_freedom:login' %}">войти</a> или <a href="{% url 'auth_freedom:register' %}">зарегистрироваться</a>
-        </div>
+{% if request.user.is_authenticated %}
+    {% if request.user.user_type == 'recruiter' %}
+    <a href="{% url 'recruiting_system:vacancy_create' %}" class="create-btn">Создать вакансию</a>
     {% endif %}
-</div>
+    
+    <div class="vacancies-grid">
+        {% for vacancy in vacancies %}
+        <div class="vacancy-card">
+            <h3 class="vacancy-title">{{ vacancy.title }}</h3>
+            <div class="vacancy-info">
+                <p><strong>Рекрутер:</strong> {{ vacancy.recruiter.user.get_full_name }}</p>
+                <p><strong>Статус:</strong> {{ vacancy.get_status_display }}</p>
+                <p><strong>Создано:</strong> {{ vacancy.created_at|date:"d.m.Y" }}</p>
+            </div>
+            <div class="button-group">
+                <a href="{% url 'recruiting_system:vacancy_detail' vacancy.pk %}" class="details-btn">Подробнее</a>
+            </div>
+        </div>
+        {% empty %}
+        <div class="vacancy-card">
+            <p>Нет доступных вакансий</p>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="vacancy-card">
+        <p>Для просмотра вакансий необходимо <a href="{% url 'auth_freedom:login' %}">войти</a> или <a href="{% url 'auth_freedom:register' %}">зарегистрироваться</a></p>
+    </div>
+{% endif %}
 {% endblock %}

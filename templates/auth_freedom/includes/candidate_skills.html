@@ -1,0 +1,7 @@
+<div class="skills-list">
+    {% for skill in profile.hard_skills %}
+        <span class="skill-tag">{{ skill }}</span>
+    {% empty %}
+        <p>Навыки не указаны</p>
+    {% endfor %}
+</div> 

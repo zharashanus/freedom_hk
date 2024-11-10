@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Создание вакансии</title>
+  <style>
+    body {
+      font-family: Arial;
+      background-color: #f4f4f4;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .modal {
+      background: white;
+      width: 800px;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      position: relative;
+    }
+
+    .modal h2 {
+      margin-top: 0;
+      font-size: 1.5rem;
+      text-align: center;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+    }
+
+    .form-grid label {
+      font-size: 0.9rem;
+      color: #333;
+    }
+
+    .form-grid input,
+    .form-grid select,
+    .form-grid textarea {
+      width: 100%;
+      padding: 10px;
+      font-size: 1rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+
+    .form-grid textarea {
+      resize: vertical;
+      height: 60px;
+    }
+
+    .button-group {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+
+    .button-group button {
+      padding: 10px 20px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .button-group .close {
+      background: #f4f4f4;
+      color: #333;
+    }
+
+    .button-group .create {
+      background: #4CAF50;
+      color: white;
+    }
+
+    /* Responsive Styles */
+    @media (max-width: 768px) {
+      .modal {
+        width: 90%;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="modal">
+    <button class="close-btn"></button>
+    <h2>Создание вакансии</h2>
+    <div class="form-grid">
+      <div>
+        <label>Название вакансии</label>
+        <input type="text" placeholder="Название вакансии">
+      </div>
+      <div>
+        <label>Обязанности</label>
+        <textarea placeholder="Обязанности"></textarea>
+      </div>
+      <div>
+        <label>Технический стек (введите через запятую)</label>
+        <textarea placeholder="Технический стек"></textarea>
+      </div>
+      <div>
+        <label>Департамент</label>
+        <input type="text" placeholder="Департамент">
+      </div>
+      <div>
+        <label>Статус</label>
+        <select>
+          <option>Выберите статус</option>
+        </select>
+      </div>
+      <div>
+        <label>Требуемые технические навыки (введите через запятую)</label>
+        <textarea placeholder="Требуемые технические навыки"></textarea>
+      </div>
+      <div>
+        <label>Страна</label>
+        <input type="text" placeholder="Страна">
+      </div>
+      <div>
+        <label>Дата закрытия</label>
+        <input type="date">
+      </div>
+      <div>
+        <label>Требуемые soft skills (введите через запятую)</label>
+        <textarea placeholder="Требуемые soft skills"></textarea>
+      </div>
+      <div>
+        <label>Регион</label>
+        <input type="text" placeholder="Регион">
+      </div>
+      <div>
+        <label>Требуемый опыт работы (лет)</label>
+        <input type="number" placeholder="Требуемый опыт работы (лет)">
+      </div>
+      <div>
+        <label>Требуемая специальность</label>
+        <input type="text" placeholder="Требуемая специальность">
+      </div>
+      <div>
+        <label>Тип занятости</label>
+        <select>
+          <option>Выберите тип занятости</option>
+        </select>
+      </div>
+      <div>
+        <label>Требуемый уровень</label>
+        <input type="text" placeholder="Требуемый уровень">
+      </div>
+      <div>
+        <label>Минимальная зарплата</label>
+        <input type="number" placeholder="Минимальная зарплата">
+      </div>
+      <div>
+        <label>Описание вакансии</label>
+        <textarea placeholder="Описание вакансии"></textarea>
+      </div>
+      <div>
+        <label>Требования</label>
+        <textarea placeholder="Требования"></textarea>
+      </div>
+      <div>
+        <label>Максимальная зарплата</label>
+        <input type="number" placeholder="Максимальная зарплата">
+      </div>
+    </div>
+    <div class="button-group">
+      <button class="close">Закрыть</button>
+      <button class="create">Создать вакансию</button>
+    </div>
+  </div>
+</body>
+</html>
